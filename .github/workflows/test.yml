@@ -1,0 +1,88 @@
+name: test-all
+on:
+  push:
+    branches-ignore:
+      - 'dependabot/**' #avoid duplicates: only run the PR, not the commit
+    tags-ignore:
+      - 'v*' #avoids rerun existing commit on release
+  pull_request:
+    branches:
+      - 'main'
+jobs:
+  test-java:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: java
+    #if: ${{ false }}  # disable for now
+    steps:
+      - name: Checkout GitHub repo
+        uses: actions/checkout@v3
+      - name: Select Java Version
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '8'
+          cache: 'maven'
+
+      - name: Build and test
+        run: mvn test -Dmaven.test.failure.ignore=true -U --no-transfer-progress
+      - name: Publish test report
+        if: always()
+        uses: mikepenz/action-junit-report@v3.7.5
+        with:
+          check_name: test-report-java
+          report_paths: '**/target/surefire-reports/TEST-*.xml'
+          fail_on_failure: 'true'
+ 
+      - if: always()
+        name: Publish test reports
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-report-java-files
+          #working-directory does not work here
+          path: |
+            java/target/surefire-reports
+  test-net:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: net
+    #dorny reporter fails if this permissions not set
+    #however it does not fail in viusal-assert build!!
+    permissions:
+      id-token: write
+      contents: read
+      checks: write
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-dotnet@v3.0.3
+        with:
+            dotnet-version: '3.1.x'
+
+      - name: Run test
+        run: dotnet test --logger "trx;LogFileName=../../reports/portable-report.trx" PortableTest/PortableTest.csproj
+
+      #Shows message in case of some failure (as test report checks are not always produced)
+      - name: Failure message if needed
+        if: failure()
+        run: echo "::error ::There was a build error or test failure, see the log and diff files in the test report artifacts"
+
+      #prevents execute on pr or dependabot that fails with "Resource not accessible by integration" due to permissions
+      - name: Publish test report
+        if: ${{ always() && github.actor=='javiertuya' }} 
+        uses: dorny/test-reporter@v1
+        with:
+          name: test-report-net
+          #working-directory does not work here
+          path: net/reports/portable-report.trx
+          reporter: dotnet-trx
+          fail-on-error: 'true'
+
+      - if: always()
+        name: Publish test reports files
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-report-net-files
+          #working-directory does not work here
+          path: net/reports
