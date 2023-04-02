@@ -14,14 +14,14 @@ namespace Giis.Portable
 		{
 			// The portable approach by specifying a class and artifact name
 			// Update when major or minor version changes
-			string version = new Versions(new PortableException(string.Empty).GetType(), "io.github.javiertuya", "portable").GetVersion();
+			string version = new Versions(new PortableException(string.Empty).GetType(), "io.github.javiertuya", "portable-java").GetVersion();
 			string[] items = JavaCs.SplitByDot(version);
 			NUnit.Framework.Assert.AreEqual("2", items[0]);
 			NUnit.Framework.Assert.AreEqual("1", items[1]);
 			// java only, does not need specify any class
 			if (Parameters.IsJava())
 			{
-				string jversion = new Versions(null, "io.github.javiertuya", "portable").GetVersion();
+				string jversion = new Versions(null, "io.github.javiertuya", "portable-java").GetVersion();
 				NUnit.Framework.Assert.AreEqual(version, jversion);
 			}
 			// net only, does not need specify artifact
