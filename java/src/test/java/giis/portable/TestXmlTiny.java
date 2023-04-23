@@ -2,6 +2,7 @@ package giis.portable;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.List;
@@ -9,10 +10,12 @@ import java.util.List;
 import org.junit.Test;
 
 import giis.portable.util.JavaCs;
+import giis.portable.util.Parameters;
 import giis.portable.xml.tiny.XNode;
 
 public class TestXmlTiny {
 	
+	//using spaces to check that is not whitespace aware
 	private static final String XML2 =
 			"<elem2>  \n" + 
 			"	\t<nested>text1</nested>\n" + 
@@ -33,6 +36,30 @@ public class TestXmlTiny {
 		assertEquals("noderoot", n.name());
 		assertEquals("elem1", n.getFirstChild().name());
 		assertEquals("<noderoot><elem1 /></noderoot>", n.outerXml());
+		assertEquals("<noderoot><elem1 /></noderoot>", n.toString());
+		//as xml document (native) gets the header, with little different element formatting
+		if (Parameters.isJava())
+			assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><noderoot><elem1/></noderoot>", n.toXmlDocument());
+	}
+
+	@Test
+	public void testFindChildren() {
+		XNode n = new XNode("<noderoot><!-- comment --><elem1>text1</elem1>text2<elem3 /></noderoot>");
+		// by default, only element nodes
+		List<XNode> n1 = n.getChildren();
+		assertEquals(2, n1.size());
+		assertTrue(n1.get(0).isElement());
+		assertEquals("elem1", n1.get(0).name());
+		assertTrue(n1.get(1).isElement());
+		assertEquals("elem3", n1.get(1).name());
+
+		// but can get all too (only text and element, comments are ignored)
+		n1 = n.getChildrenWithText();
+		assertEquals(3, n1.size());
+		assertEquals("elem1", n1.get(0).name());
+		assertTrue(n1.get(1).isText());
+		assertEquals("text2", n1.get(1).innerText());
+		assertEquals("elem3", n1.get(2).name());
 	}
 
 	@Test
@@ -77,7 +104,7 @@ public class TestXmlTiny {
 		assertEquals("<nested>text1</nested>", xn.outerXml());
 	}
 	@Test
-	public void testElementFindChildren() {
+	public void testElementFindChildrenByName() {
 		XNode n = new XNode(XML1);
 		List<XNode> n1 = n.getChildren("elem1");
 		assertEquals(1, n1.size());
@@ -143,7 +170,7 @@ public class TestXmlTiny {
 		n = n.getFirstChild();
 		assertEquals("[]", JavaCs.deepToString(JavaCs.toArray(n.getAttributeNames())));
 	}
-
+	
 	@Test
 	public void testTextValuesAndChanges() {
 		String xml = "<root><elem1/><elem2><child/></elem2><elem3>texto</elem3></root>";
@@ -224,12 +251,17 @@ public class TestXmlTiny {
 		assertEquals("newelem", newNode.name());
 		assertEquals("<root><elem1 /><newelem /></root>", n.outerXml());
 		// after empty node
-		newNode = newNode.appendChild("afterempty");
+		newNode = newNode.appendChild(newNode.createElement("afterempty"));
+		assertEquals("afterempty", newNode.name());
 		assertEquals("<root><elem1 /><newelem><afterempty /></newelem></root>", n.outerXml());
 		// after text
 		n = new XNode("<root>text</root>");
 		newNode = n.appendChild("aftertext");
 		assertEquals("<root>text<aftertext /></root>", n.outerXml());
+		// add text node
+		newNode = n.appendChild(n.createText("newtext"));
+		assertEquals("newtext", newNode.innerText());
+		assertEquals("<root>text<aftertext />newtext</root>", n.outerXml());
 	}
 
 }

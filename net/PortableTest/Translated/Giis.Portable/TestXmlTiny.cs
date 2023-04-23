@@ -16,6 +16,7 @@ namespace Giis.Portable
 
 		private const string Xml1 = "<noderoot>\r\n" + "  <elem1 />  \n" + "  " + Xml2 + "\n" + "  <elem3>text3</elem3>  \n" + "</noderoot>\n ";
 
+		//using spaces to check that is not whitespace aware
 		//note that XML1 contains XML2
 		[Test]
 		public virtual void TestDocumentRoot()
@@ -24,6 +25,32 @@ namespace Giis.Portable
 			NUnit.Framework.Assert.AreEqual("noderoot", n.Name());
 			NUnit.Framework.Assert.AreEqual("elem1", n.GetFirstChild().Name());
 			NUnit.Framework.Assert.AreEqual("<noderoot><elem1 /></noderoot>", n.OuterXml());
+			NUnit.Framework.Assert.AreEqual("<noderoot><elem1 /></noderoot>", n.ToString());
+			//as xml document (native) gets the header, with little different element formatting
+			if (Parameters.IsJava())
+			{
+				NUnit.Framework.Assert.AreEqual("<?xml version=\"1.0\" encoding=\"UTF-8\"?><noderoot><elem1/></noderoot>", n.ToXmlDocument());
+			}
+		}
+
+		[Test]
+		public virtual void TestFindChildren()
+		{
+			XNode n = new XNode("<noderoot><!-- comment --><elem1>text1</elem1>text2<elem3 /></noderoot>");
+			// by default, only element nodes
+			IList<XNode> n1 = n.GetChildren();
+			NUnit.Framework.Assert.AreEqual(2, n1.Count);
+			NUnit.Framework.Assert.IsTrue(n1[0].IsElement());
+			NUnit.Framework.Assert.AreEqual("elem1", n1[0].Name());
+			NUnit.Framework.Assert.IsTrue(n1[1].IsElement());
+			NUnit.Framework.Assert.AreEqual("elem3", n1[1].Name());
+			// but can get all too (only text and element, comments are ignored)
+			n1 = n.GetChildrenWithText();
+			NUnit.Framework.Assert.AreEqual(3, n1.Count);
+			NUnit.Framework.Assert.AreEqual("elem1", n1[0].Name());
+			NUnit.Framework.Assert.IsTrue(n1[1].IsText());
+			NUnit.Framework.Assert.AreEqual("text2", n1[1].InnerText());
+			NUnit.Framework.Assert.AreEqual("elem3", n1[2].Name());
 		}
 
 		[Test]
@@ -66,7 +93,7 @@ namespace Giis.Portable
 		}
 
 		[Test]
-		public virtual void TestElementFindChildren()
+		public virtual void TestElementFindChildrenByName()
 		{
 			XNode n = new XNode(Xml1);
 			IList<XNode> n1 = n.GetChildren("elem1");
@@ -220,12 +247,17 @@ namespace Giis.Portable
 			NUnit.Framework.Assert.AreEqual("newelem", newNode.Name());
 			NUnit.Framework.Assert.AreEqual("<root><elem1 /><newelem /></root>", n.OuterXml());
 			// after empty node
-			newNode = newNode.AppendChild("afterempty");
+			newNode = newNode.AppendChild(newNode.CreateElement("afterempty"));
+			NUnit.Framework.Assert.AreEqual("afterempty", newNode.Name());
 			NUnit.Framework.Assert.AreEqual("<root><elem1 /><newelem><afterempty /></newelem></root>", n.OuterXml());
 			// after text
 			n = new XNode("<root>text</root>");
 			newNode = n.AppendChild("aftertext");
 			NUnit.Framework.Assert.AreEqual("<root>text<aftertext /></root>", n.OuterXml());
+			// add text node
+			newNode = n.AppendChild(n.CreateText("newtext"));
+			NUnit.Framework.Assert.AreEqual("newtext", newNode.InnerText());
+			NUnit.Framework.Assert.AreEqual("<root>text<aftertext />newtext</root>", n.OuterXml());
 		}
 	}
 }

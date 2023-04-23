@@ -10,6 +10,11 @@ import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -19,67 +24,42 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import giis.portable.util.PortableException;
+
 /**
  * Simple wrapper to read xml documents with unified management of text and element nodes.
  * Includes a few methods to manipulate the document
  */
 public class XNode extends XNodeAbstract {
-	private Node node = null;
+	protected Node node = null; // not private to allow extend this class
 
 	public XNode(String xml) {
 		Document doc = newDocument(xml);
 		this.node = doc.getFirstChild();
 	}
-
-	private XNode(Node nativeNode) {
+	// Not private to be more extensible
+	public XNode(Node nativeNode) {
 		this.node = nativeNode;
 	}
-
-	@Override
-	public String getAttribute(String name) {
-		if (!isElement(this.node)) // text nodes do not have attributes
-			return "";
-		return ((Element) this.node).getAttribute(name);
-	}
-	@Override
-	public void setAttribute(String name, String value) {
-		if (!isElement(this.node))
-			return;
-		((Element) this.node).setAttribute(name, value);
-	}
-	@Override
-	public List<String> getAttributeNames() {
-		List<String> attrs = new ArrayList<>();
-		if (!isElement(this.node))
-			return attrs;
-		NamedNodeMap xattrs = this.node.getAttributes();
-		for (int i = 0; i < xattrs.getLength(); i++)
-			attrs.add(xattrs.item(i).getNodeName());
-		Collections.sort(attrs);
-		return attrs;
+	public Node getNativeNode() {
+		return this.node;
 	}
 
-	/**
-	 * Gets the first child with the specified name, null if it does not exist
-	 */
 	@Override
-	public XNode getChild(String elementName) {
-		List<XNode> children = getChildren(elementName, false);
-		if (children.size() > 0) // NOSONAR compatibility java 1.4 and C#
-			return children.get(0);
-		return null;
+	public boolean isElement() {
+		return this.node.getNodeType() == Node.ELEMENT_NODE;
 	}
-	/**
-	 * Gets a list of all children with the specified name
-	 */
 	@Override
-	public List<XNode> getChildren(String elementName) {
-		return getChildren(elementName, true);
+	public boolean isText() {
+		return this.node.getNodeType() == Node.TEXT_NODE;
 	}
-	
 	@Override
-	public XNode getFirstChild() {
-		return new XNode(this.node.getFirstChild());
+	public XNode createElement(String elementName) {
+		return new XNode(this.node.getOwnerDocument().createElement(elementName));
+	}
+	@Override
+	public XNode createText(String textValue) {
+		return new XNode(this.node.getOwnerDocument().createTextNode(textValue));
 	}
 
 	@Override
@@ -110,14 +90,7 @@ public class XNode extends XNodeAbstract {
 		Node newChild = this.node.getOwnerDocument().createTextNode(value);
 		this.node.appendChild(newChild);
 	}
-
-	@Override
-	public XNode appendChild(String elementName) {
-		Node newChild = this.node.getOwnerDocument().createElement(elementName);
-		this.node.appendChild(newChild);
-		return new XNode(newChild);
-	}
-
+	
 	@Override
 	public String outerXml() {
 		return toXmlString(this.node, true);
@@ -129,6 +102,43 @@ public class XNode extends XNodeAbstract {
 	@Override
 	public String toString() {
 		return outerXml();
+	}
+
+	@Override
+	public String getAttribute(String name) {
+		if (!this.isElement()) // text nodes do not have attributes
+			return "";
+		return ((Element) this.node).getAttribute(name);
+	}
+	@Override
+	public void setAttribute(String name, String value) {
+		if (!this.isElement())
+			return;
+		((Element) this.node).setAttribute(name, value);
+	}
+	@Override
+	public List<String> getAttributeNames() {
+		List<String> attrs = new ArrayList<>();
+		if (!this.isElement())
+			return attrs;
+		NamedNodeMap xattrs = this.node.getAttributes();
+		for (int i = 0; i < xattrs.getLength(); i++)
+			attrs.add(xattrs.item(i).getNodeName());
+		Collections.sort(attrs);
+		return attrs;
+	}
+
+	@Override
+	public XNode getFirstChild() {
+		return new XNode(this.node.getFirstChild());
+	}
+	@Override
+	public XNode appendChild(String elementName) {
+		return appendChild(this.createElement(elementName));
+	}
+	public XNode appendChild(XNode elementOrTextNode) {
+		Node newChild = this.node.appendChild(elementOrTextNode.getNativeNode());
+		return new XNode(newChild);
 	}
 
 	// Additional methods for internal use
@@ -144,31 +154,27 @@ public class XNode extends XNodeAbstract {
 			DocumentBuilder builder;
 			builder = factory.newDocumentBuilder();
 			return builder.parse(new InputSource(new StringReader(xml)));
-		} catch (ParserConfigurationException e1) {
-			throw new RuntimeException(e1); // NOSONAR
-		} catch (SAXException e2) {
-			throw new RuntimeException(e2); // NOSONAR
-		} catch (IOException e3) {
-			throw new RuntimeException(e3); // NOSONAR
+		} catch (ParserConfigurationException | SAXException | IOException e) {
+			throw new PortableException(e);
 		}
 	}
 
-	private List<XNode> getChildren(String elementName, boolean returnAll) {
+	//Returns child element or text nodes as indicated
+	//If element, allows search by node name, oherwise, set elementName to null
+	@Override
+	protected List<XNode> getChildren(boolean returnElements, boolean returnTexts, String elementName, boolean onlyFirst) {
 		List<XNode> children = new ArrayList<>();
 		Node child = node.getFirstChild();
 		while (child != null) {
-			if (isElement(child) && child.getNodeName().equals(elementName)) {
+			if (returnElements && child.getNodeType() == Node.ELEMENT_NODE && (elementName==null || child.getNodeName().equals(elementName))
+					|| returnTexts && child.getNodeType() == Node.TEXT_NODE) {
 				children.add(new XNode(child));
-				if (!returnAll) // returns the first one that matches
+				if (onlyFirst) // returns the first one that matches
 					return children;
 			}
 			child = child.getNextSibling();
 		}
 		return children;
-	}
-
-	private boolean isElement(Node n) {
-		return n.getNodeType() == Node.ELEMENT_NODE;
 	}
 
 	private String toXmlString(Node n, boolean viewRoot) {
@@ -213,7 +219,7 @@ public class XNode extends XNodeAbstract {
 
 	private String getAttributesString(Node n) {
 		StringBuilder attr = new StringBuilder();
-		if (isElement(n) && n.hasAttributes()) {
+		if (n.getNodeType() == Node.ELEMENT_NODE && n.hasAttributes()) {
 			for (int i = 0; i < n.getAttributes().getLength(); i++) {
 				String aName = n.getAttributes().item(i).getNodeName();
 				String aValue = n.getAttributes().item(i).getNodeValue();
@@ -221,6 +227,27 @@ public class XNode extends XNodeAbstract {
 			}
 		}
 		return attr.toString();
+	}
+
+	/**
+	 * Returns the string that represents a node as a document (including the
+	 * document header) using a transformer for output; use this method when
+	 * transforming large nodes to string.
+	 * http://stackoverflow.com/questions/3300839/get-a-nodes-inner-xml-as-string-in-java-dom
+	 */
+	public String toXmlDocument() {
+		try {
+			TransformerFactory tFactory = TransformerFactory.newInstance(); // NOSONAR
+			Transformer transformer = tFactory.newTransformer();
+			DOMSource source = new DOMSource(this.node);
+			java.io.StringWriter sw = new java.io.StringWriter();
+			StreamResult result = new StreamResult(sw);
+			transformer.transform(source, result);
+			return sw.toString();
+		} catch (TransformerException tce) {
+			// Error generated by the parser, use the contained exception, if any
+			throw new PortableException(tce.getException() == null ? tce : tce.getException());
+		}
 	}
 
 }
