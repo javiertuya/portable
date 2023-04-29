@@ -8,6 +8,11 @@ on:
   pull_request:
     branches:
       - 'main'
+
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   test-java:
     runs-on: ubuntu-latest
@@ -86,3 +91,50 @@ jobs:
           name: test-report-net-files
           #working-directory does not work here
           path: net/reports
+
+  publish-java-snapshot:
+    #needs: [test-java]
+    #avoid publishing dependabot branches
+    if: ${{ github.actor != 'dependabot[bot]' }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: java
+    env:
+      BRANCH_NAME: ${{ github.head_ref || github.ref_name }} 
+    steps:
+      - name: Checkout GitHub repo
+        uses: actions/checkout@v3
+      - name: Select Java Version
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '8'
+          cache: 'maven'
+
+      - name: Rename version to <version number>-<branch name>-SNAPSHOT
+        run: |
+          oldversion=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          echo "Renaming old version: ${oldversion}"
+          version=${oldversion//-SNAPSHOT/}
+          version=${version}-${BRANCH_NAME}-SNAPSHOT
+          echo "to new Version: $version"
+          mvn versions:set -DnewVersion=$version --no-transfer-progress
+
+      # manage package versions shows the date in which branch was created, not executed
+      # if no changing version number, this will keep latest 2 branches BY BRANCH CREATION
+      # because of this, deletion must be done BEFORE deploy (if not, a version of old branch can be deleted after being updated)
+      # TODO check how to exclude current branch
+      # NOTE at least one package must exist, if not the build fails (comment for the first build)
+      - uses: actions/delete-package-versions@v4
+        with: 
+          package-name: 'io.github.javiertuya.portable-java'
+          package-type: 'maven'
+          min-versions-to-keep: 4
+          delete-only-pre-release-versions: "true"
+
+      # note that deploy uses the profile that specifies the github repository server
+      - name: Deploy to GitHub packages
+        run: mvn deploy -P publish-github -DskipTests=true -U --no-transfer-progress
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

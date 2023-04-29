@@ -34,7 +34,7 @@ jobs:
 
       - name: Publish to Apache Maven Central
         # signing is included only in the specified profile
-        run: mvn deploy --no-transfer-progress -P sign-artifacts
+        run: mvn deploy --no-transfer-progress -P publish-maven
         env:
           MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
           MAVEN_CENTRAL_TOKEN: ${{ secrets.MAVEN_CENTRAL_TOKEN }}
