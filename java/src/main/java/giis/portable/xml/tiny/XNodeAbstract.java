@@ -9,21 +9,28 @@ public abstract class XNodeAbstract {
 	
 	// Node primitives
 	
+	public abstract boolean equals(XNode xn);
 	public abstract boolean isElement();
 	public abstract boolean isText();
+	public abstract boolean isWhitespace();
+	
 	public abstract XNode createElement(String elementName);
 	public abstract XNode createText(String textValue);
 	public abstract String name();
+	public abstract String value();
+	public abstract void setValue(String value);
 	public abstract String innerText();
 	public abstract void setInnerText(String value);
 	public abstract String outerXml();
 	public abstract String innerXml();
+	public abstract void setInnerXml(String value);
 	
 	// Attribute primitives
 	
 	public abstract String getAttribute(String name);
 	public abstract void setAttribute(String name, String value);
 	public abstract List<String> getAttributeNames();
+	public abstract String getAttributesString();
 	
 	public int getIntAttribute(String name) {
 		String current = this.getAttribute(name);
@@ -41,10 +48,55 @@ public abstract class XNodeAbstract {
 			this.setAttribute(name, String.valueOf(value + Integer.parseInt(this.getAttribute(name))));
 	}
 	
-	// Node manipulation
+	/**
+	 * Gets the text inside the element with the indicated name, if it does not exist returns empty.
+	 * It allows to represent logical attributes as elements as an alternative to native attributes
+	 */
+	public String getElementAtribute(String name) {
+		XNode elem = this.getChild(name);
+		return elem == null ? "" : elem.innerText();
+	}
 	
-	public abstract XNode getFirstChild();
-	public abstract XNode appendChild(String elementName);
+	// Node manipulation primitives
+	
+	public abstract XNode cloneNode();
+	public abstract XNode importNode(XNode source);
+	public abstract XNode createNode(String xml);
+	public abstract void normalize();
+	
+	public abstract XNode removeChild(XNode oldChild);
+	public abstract XNode appendChild(XNode elementOrTextNode);
+	public XNode appendChild(String elementName) {
+		return appendChild(createElement(elementName));
+	}
+	public abstract XNode prependChild(XNode node);
+	public abstract XNode replaceChild(XNode newChild, XNode oldChild);
+	public abstract XNode insertBefore(XNode newChild);
+	public abstract XNode insertAfter(XNode newChild);
+	public XNode insertBefore(String elementName) {
+		return this.insertBefore(this.createElement(elementName));
+	}
+	public XNode insertAfter(String elementName) {
+		return this.insertAfter(this.createElement(elementName));
+	}
+	
+	public abstract void removeAttribute(String name);
+	
+	// Node navigation
+	
+	public abstract boolean isRoot();
+	public abstract XNode parent();
+	public abstract XNode root();
+	public abstract XNode firstChild();
+	public abstract XNode nextSibling();
+	public abstract XNode previousSibling();
+	/**
+	 * @deprecated use firstChild()
+	 */
+	@Deprecated
+	public XNode getFirstChild() {
+		return firstChild();
+	}
 	
 	protected abstract List<XNode> getChildren(boolean returnElements, boolean returnTexts, String elementName, boolean onlyFirst);
 	
@@ -74,6 +126,18 @@ public abstract class XNodeAbstract {
 	 */
 	public List<XNode> getChildrenWithText() {
 		return getChildren(true, true, null, false);
+	}
+	/**
+	 * Gets the number of children, including both text and elements
+	 */
+	public int childCount() {
+		int count = 0;
+		XNode child = this.firstChild();
+		while (child != null) {
+			count++;
+			child = child.nextSibling();
+		}
+		return count;
 	}
 
 	// Character encoding

@@ -24,8 +24,6 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import giis.portable.util.PortableException;
-
 /**
  * Simple wrapper to read xml documents with unified management of text and element nodes.
  * Includes a few methods to manipulate the document
@@ -44,6 +42,17 @@ public class XNode extends XNodeAbstract {
 	public Node getNativeNode() {
 		return this.node;
 	}
+	private XNode newXNode(Node nativeNode) {
+		return nativeNode==null ? null : new XNode(nativeNode);
+	}
+
+	@Override
+	public boolean equals(XNode xn) { //NOSONAR
+		/*mismo codigo que en .NET*/
+		if (this.node==null || xn==null || xn.getNativeNode()==null) 
+			return false;
+		return this.node.equals(xn.getNativeNode());
+	}
 
 	@Override
 	public boolean isElement() {
@@ -54,18 +63,46 @@ public class XNode extends XNodeAbstract {
 		return this.node.getNodeType() == Node.TEXT_NODE;
 	}
 	@Override
-	public XNode createElement(String elementName) {
-		return new XNode(this.node.getOwnerDocument().createElement(elementName));
+	public boolean isWhitespace() {
+		return isBlank(this.node);
 	}
+	private boolean isBlank(Node n) {
+		if (n == null)
+			return false;
+		if (n.getNodeType() == Node.TEXT_NODE) { // nodo texto, si algun caracter es no blanco finaliza con false
+			String nodeText = n.getNodeValue();
+			for (int i = 0; i < nodeText.length(); i++)
+				if (nodeText.charAt(i) != ' ' && nodeText.charAt(i) != '\n' && nodeText.charAt(i) != '\r'
+						&& nodeText.charAt(i) != '\t')
+					return false;
+			return true; // si llega aqui el contenido es solamente blancos (o es una cadena vacia)
+		} else // nodo no texto, falso
+			return false;
+	}
+	
+	@Override
+	public XNode createElement(String elementName) {
+		return newXNode(this.node.getOwnerDocument().createElement(elementName));
+	}
+
 	@Override
 	public XNode createText(String textValue) {
-		return new XNode(this.node.getOwnerDocument().createTextNode(textValue));
+		return newXNode(this.node.getOwnerDocument().createTextNode(textValue));
 	}
 
 	@Override
 	public String name() {
 		return this.node.getNodeName();
 	}
+	@Override
+	public String value() {
+		return this.node.getNodeValue();
+	}
+	@Override
+	public void setValue(String value) {
+		this.node.setNodeValue(value);
+	}
+
 	@Override
 	public String innerText() { // no uso getTextContent pues no es compatible con java 1.4
 		if (this.node.getNodeType() == Node.TEXT_NODE)
@@ -74,7 +111,7 @@ public class XNode extends XNodeAbstract {
 		StringBuilder sb = new StringBuilder();
 		NodeList nl = this.node.getChildNodes();
 		for (int i = 0; i < nl.getLength(); i++)
-			sb.append(new XNode(nl.item(i)).innerText());
+			sb.append(newXNode(nl.item(i)).innerText());
 		return sb.toString();
 	}
 	@Override
@@ -85,7 +122,8 @@ public class XNode extends XNodeAbstract {
 		}
 		// elemento, borra el contenido y anyade el nodo texto con el valor
 		NodeList nl = this.node.getChildNodes();
-		for (int i = 0; i < nl.getLength(); i++)
+		//for (int i = 0; i < nl.getLength(); i++)
+		for (int i=nl.getLength()-1; i>=0; i--)
 			this.node.removeChild(nl.item(i));
 		Node newChild = this.node.getOwnerDocument().createTextNode(value);
 		this.node.appendChild(newChild);
@@ -100,6 +138,33 @@ public class XNode extends XNodeAbstract {
 		return toXmlString(this.node, false);
 	}
 	@Override
+	public void setInnerXml(String value) { 
+		//excepcion si es un nodo de tipo texto
+		if (this.node.getNodeType()==Node.TEXT_NODE)
+			throw new XmlException("XNode.setInnerXml: Only allowed for Element nodes");
+		//primero borra el contenido del nodo actual
+		//lo hace desde el final hasta el principio por si acaso
+		removeChildren();
+		//si no hay que introducir ningun valor finaliza aqui
+		if (value.equals("")) 
+			return;
+		//crea un nuevo documento para extraer de el todos los nodos
+		Document d=newDocument("<document>"+value+"</document>");
+		Node n=d.getFirstChild();
+		NodeList nlist=n.getChildNodes();
+		// ahora copia cada hijo de estos al destino
+		for (int i=0; i<nlist.getLength(); i++) {
+			//da igual que sean nodos en blanco, paso todos para evitar problemas ya
+			//que adoptNode funciona eliminando primero el original, y esto podria invalidar la iteracion?
+			Node adopted=this.node.getOwnerDocument().importNode(nlist.item(i),true);
+			this.node.appendChild(adopted);
+		}
+	}
+	public void removeChildren() {
+		while (this.node.getFirstChild()!=null)
+			this.node.removeChild(this.node.getFirstChild());
+	}
+	@Override
 	public String toString() {
 		return outerXml();
 	}
@@ -110,6 +175,7 @@ public class XNode extends XNodeAbstract {
 			return "";
 		return ((Element) this.node).getAttribute(name);
 	}
+
 	@Override
 	public void setAttribute(String name, String value) {
 		if (!this.isElement())
@@ -127,20 +193,127 @@ public class XNode extends XNodeAbstract {
 		Collections.sort(attrs);
 		return attrs;
 	}
+	@Override
+	public String getAttributesString() {
+		return getAttributesString(this.node);
+	}
 
 	@Override
-	public XNode getFirstChild() {
-		return new XNode(this.node.getFirstChild());
+	public XNode cloneNode() {
+		return newXNode(this.node.cloneNode(true));
+	}
+	/**
+	 * Returns the node after being imported into the Document of current node.
+	 * Avoids exceptions like:
+	 * WRONG_DOCUMENT_ERR: A node is used in a different document than the one that created it.
+	 */
+	@Override
+	public XNode importNode(XNode source) {
+		Node xnn=source.getNativeNode();
+		Node xni=this.node.getOwnerDocument().importNode(xnn, true);
+		return newXNode(xni);
+	}
+
+	/**
+	 * Creates a new Node from a xml string: the difference with constructor is that
+	 * the new node is created in the context of the Document to which the current
+	 * node belongs (this avoids importing nodes)
+	 */
+	@Override
+	public XNode createNode(String xml) {
+		XNode n = this.createElement("newnode");
+		n.setInnerXml(xml);
+		return n.firstChild();
+	}
+	
+	@Override
+	public void normalize() {
+		this.node.normalize();
+	}
+	
+	@Override
+	public XNode removeChild(XNode oldChild) {
+		return newXNode(this.node.removeChild(oldChild.getNativeNode()));
 	}
 	@Override
-	public XNode appendChild(String elementName) {
-		return appendChild(this.createElement(elementName));
-	}
 	public XNode appendChild(XNode elementOrTextNode) {
 		Node newChild = this.node.appendChild(elementOrTextNode.getNativeNode());
-		return new XNode(newChild);
+		return newXNode(newChild);
+	}
+	@Override
+	public XNode prependChild(XNode node) {
+		XNode first = this.firstChild();
+		if (first == null)
+			return this.appendChild(node);
+		else
+			return first.insertBefore(node);
+	}
+	@Override
+	public XNode replaceChild(XNode newChild, XNode oldChild) {
+		return newXNode(this.node.replaceChild(newChild.node, oldChild.node));
+	}
+	
+	@Override
+	public XNode insertBefore(XNode newChild) {
+		return newXNode(this.node.getParentNode().insertBefore(newChild.getNativeNode(), this.node));
+	}
+	@Override
+	public XNode insertAfter(XNode newChild) {
+		//puesto que insertAfter no existe en dom (aunque si insertBefore), este metodo implementa una alternativa
+		if (this.nextSibling() == null) // si esta al final usa el metodo de anyadir nodos
+			return this.parent().appendChild(newChild);
+		else // inserta antes del siguiente
+			return this.nextSibling().insertBefore(newChild);
 	}
 
+	@Override
+	public void removeAttribute(String name) {
+		try {
+			((Element) this.node).removeAttribute(name);
+		} catch (ClassCastException e) {
+			throw new XmlException("XNode.removeAttribute: Operacion no permitida si el nodo no es Element", e);
+		}
+	}
+
+	@Override
+	public boolean isRoot() {
+		XNode parent = this.parent();
+		return (parent == null || parent.getNativeNode().getNodeType() == Node.DOCUMENT_NODE);
+	}
+	@Override
+	public XNode root() {
+		Node n = this.node.getOwnerDocument().getFirstChild();
+		return new XNode(n);
+	}
+	@Override
+	public XNode parent() {
+		Node parent=this.node.getParentNode();
+		return parent == null || parent.getNodeType() == Node.DOCUMENT_NODE ? null : newXNode(parent);
+	}
+	@Override
+	public XNode firstChild() { 
+		Node n=this.node.getFirstChild();
+		n=this.skipBlankSiblings(n,true);
+		return newXNode(n);
+	}
+	@Override
+	public XNode nextSibling() {
+		Node n=this.node.getNextSibling();
+		n=this.skipBlankSiblings(n,true);
+		return newXNode(n); 
+	}
+	@Override
+	public XNode previousSibling() {
+		Node n=this.node.getPreviousSibling();
+		n=this.skipBlankSiblings(n,false);
+		return newXNode(n); 
+	}
+	private Node skipBlankSiblings(Node n, boolean forward) {
+		while (isBlank(n))
+			n = forward ? n.getNextSibling() : n.getPreviousSibling(); 
+		return n;
+	}
+	
 	// Additional methods for internal use
 
 	/**
@@ -155,7 +328,7 @@ public class XNode extends XNodeAbstract {
 			builder = factory.newDocumentBuilder();
 			return builder.parse(new InputSource(new StringReader(xml)));
 		} catch (ParserConfigurationException | SAXException | IOException e) {
-			throw new PortableException(e);
+			throw new XmlException(e);
 		}
 	}
 
@@ -167,8 +340,8 @@ public class XNode extends XNodeAbstract {
 		Node child = node.getFirstChild();
 		while (child != null) {
 			if (returnElements && child.getNodeType() == Node.ELEMENT_NODE && (elementName==null || child.getNodeName().equals(elementName))
-					|| returnTexts && child.getNodeType() == Node.TEXT_NODE) {
-				children.add(new XNode(child));
+					|| returnTexts && child.getNodeType() == Node.TEXT_NODE && !isBlank(child)) {
+				children.add(newXNode(child));
 				if (onlyFirst) // returns the first one that matches
 					return children;
 			}
@@ -216,7 +389,7 @@ public class XNode extends XNodeAbstract {
 			sb.append("</" + nodeName + ">");
 		return sb.toString();
 	}
-
+	
 	private String getAttributesString(Node n) {
 		StringBuilder attr = new StringBuilder();
 		if (n.getNodeType() == Node.ELEMENT_NODE && n.hasAttributes()) {
@@ -246,7 +419,7 @@ public class XNode extends XNodeAbstract {
 			return sw.toString();
 		} catch (TransformerException tce) {
 			// Error generated by the parser, use the contained exception, if any
-			throw new PortableException(tce.getException() == null ? tce : tce.getException());
+			throw new XmlException(tce.getException() == null ? tce : tce.getException());
 		}
 	}
 

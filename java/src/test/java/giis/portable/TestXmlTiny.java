@@ -1,6 +1,7 @@
 package giis.portable;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -32,9 +33,9 @@ public class TestXmlTiny {
 
 	@Test
 	public void testDocumentRoot() {
-		XNode n = new XNode("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n   \n<noderoot><elem1/></noderoot>   ");
+		XNode n = new XNode("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n \t \r<noderoot><elem1/></noderoot>   ");
 		assertEquals("noderoot", n.name());
-		assertEquals("elem1", n.getFirstChild().name());
+		assertEquals("elem1", n.firstChild().name());
 		assertEquals("<noderoot><elem1 /></noderoot>", n.outerXml());
 		assertEquals("<noderoot><elem1 /></noderoot>", n.toString());
 		//as xml document (native) gets the header, with little different element formatting
@@ -44,20 +45,24 @@ public class TestXmlTiny {
 
 	@Test
 	public void testFindChildren() {
-		XNode n = new XNode("<noderoot><!-- comment --><elem1>text1</elem1>text2<elem3 /></noderoot>");
+		XNode n = new XNode("<noderoot><!-- comment --><elem1>text1</elem1>text2<elem3 /> \n </noderoot>");
 		// by default, only element nodes
 		List<XNode> n1 = n.getChildren();
 		assertEquals(2, n1.size());
 		assertTrue(n1.get(0).isElement());
+		assertFalse(n1.get(0).isText());
+		assertFalse(n1.get(0).isWhitespace());
 		assertEquals("elem1", n1.get(0).name());
 		assertTrue(n1.get(1).isElement());
 		assertEquals("elem3", n1.get(1).name());
 
-		// but can get all too (only text and element, comments are ignored)
+		// but can get all too (only text and element, comments and blanks are ignored)
 		n1 = n.getChildrenWithText();
 		assertEquals(3, n1.size());
 		assertEquals("elem1", n1.get(0).name());
 		assertTrue(n1.get(1).isText());
+		assertFalse(n1.get(1).isElement());
+		assertFalse(n1.get(1).isWhitespace());
 		assertEquals("text2", n1.get(1).innerText());
 		assertEquals("elem3", n1.get(2).name());
 	}
@@ -82,6 +87,15 @@ public class TestXmlTiny {
 		assertEquals("text3", n3.innerXml());
 		assertEquals("text3", n3.innerText());
 
+		// value() is null for elements
+		assertEquals(null, n3.value());
+		assertEquals("text3", n3.firstChild().value());
+		// setter no effect for elements
+		n3.setValue("xyz");
+		assertEquals("<elem3>text3</elem3>", n3.outerXml());
+		n3.firstChild().setValue("abc");
+		assertEquals("<elem3>abc</elem3>", n3.outerXml());
+		
 		// child does not exist
 		XNode nn = n.getChild("doesnotexist");
 		assertNull(nn);
@@ -121,21 +135,63 @@ public class TestXmlTiny {
 		List<XNode> nn = n.getChildren("doesnotexist");
 		assertEquals(0, nn.size());
 	}
+	
+	@Test
+	public void testNavigateSiblings() {
+		String xml = "<root> \n <elem1/>text</root>";
+		XNode n = new XNode(xml).firstChild();
+		assertEquals("elem1", n.name());
+		assertNull(n.previousSibling());
+		n = n.nextSibling();
+		assertEquals("text", n.innerText());
+		assertEquals("elem1", n.previousSibling().name());
+		n = n.nextSibling();
+		assertNull(n);
+	}
+	@Test
+	public void testNavigateUpDown() {
+		String xml = "<root><elem1><elem2 /></elem1></root>";
+		XNode n = new XNode(xml);
+		assertTrue(n.isRoot());
+		assertFalse(n.firstChild().isRoot());
+		assertFalse(n.firstChild().firstChild().isRoot());
+		assertTrue(n.firstChild().firstChild().root().isRoot());
+		assertEquals(xml, n.firstChild().firstChild().root().outerXml());
+		assertEquals(xml, n.firstChild().parent().outerXml());
+		assertNull(n.parent());
+
+		// navigating up/down returns the same node
+		assertTrue(n.equals(n.firstChild().firstChild().root()));
+		assertFalse(n.equals(n.firstChild().firstChild()));
+		assertFalse(n.equals(null));
+	}
 
 	@Test
-	public void testElementAttributes() { // TODO atributos sobre nodo texto
-		String xml = "<root><elem1 aaa=\"text1\" bbb=\"3\" /><elem2 /></root>";
+	public void testElementAttributesRead() {
+		String xml = "<root><elem1 bbb=\"text1\" aaa=\"3\" /><elem2 /></root>";
 		XNode n = new XNode(xml);
 		XNode n1 = n.getChild("elem1");
-		assertEquals("text1", n1.getAttribute("aaa"));
+		assertEquals("text1", n1.getAttribute("bbb"));
 		assertEquals("", n1.getAttribute("doesnotexist")); // default is empty
-		assertEquals("3", n1.getAttribute("bbb"));
-		assertEquals(xml, n.outerXml());
+		assertEquals("3", n1.getAttribute("aaa"));
+		assertEquals(" aaa=\"3\" bbb=\"text1\"", n1.getAttributesString()); // sorted
+	}
+	@Test
+	public void testElementAttributesUpdate() {
+		XNode n = new XNode("<root><elem/></root>");
+		XNode n2 = n.getChild("elem");
+		n2.setAttribute("xxx", "new1");
+		n2.setAttribute("yyy", "new2");
+		assertEquals("new1", n2.getAttribute("xxx"));
+		assertEquals("new2", n2.getAttribute("yyy"));
+		assertEquals("<elem xxx=\"new1\" yyy=\"new2\" />", n2.outerXml());
 
-		XNode n2 = n.getChild("elem2");
-		n2.setAttribute("xxx", "new");
-		assertEquals("new", n2.getAttribute("xxx"));
-		assertEquals("<elem2 xxx=\"new\" />", n2.outerXml());
+		n2.removeAttribute("yyy");
+		assertEquals("<elem xxx=\"new1\" />", n2.outerXml());
+		n2.removeAttribute("xxx");
+		assertEquals("<elem />", n2.outerXml());
+		n2.removeAttribute("doesnotexist");
+		assertEquals("<elem />", n2.outerXml());
 	}
 	@Test
 	public void testElementAttributesAsInt() {
@@ -157,6 +213,14 @@ public class TestXmlTiny {
 		}
 	}
 	@Test
+	public void testElementAttributesAsElement() {
+		String xml = "<root><elem1><aaa>text1</aaa><bbb>text2</bbb><bbb>text3</bbb></elem1></root>";
+		XNode n1 = new XNode(xml).getChild("elem1");
+		assertEquals("text1", n1.getElementAtribute("aaa"));
+		assertEquals("text2", n1.getElementAtribute("bbb")); // first if there are more than one element
+		assertEquals("", n1.getElementAtribute("doesnotexist"));
+	}
+	@Test
 	public void testElementAttributeNames() {
 		String xml = "<root><elem1 bbb=\"val2\" ccc=\"val3\" aaa=\"val1\" /><elem2/></root>";
 		XNode n = new XNode(xml).getChild("elem1");
@@ -167,7 +231,7 @@ public class TestXmlTiny {
 		assertEquals("[]", JavaCs.deepToString(JavaCs.toArray(n.getAttributeNames())));
 
 		// is text
-		n = n.getFirstChild();
+		n = n.firstChild();
 		assertEquals("[]", JavaCs.deepToString(JavaCs.toArray(n.getAttributeNames())));
 	}
 	
@@ -193,7 +257,7 @@ public class TestXmlTiny {
 		// valores y cambios de valor en nodos texto
 		XNode n3 = n.getChild("elem3");
 		assertEquals("texto", n3.innerText());
-		n3 = n3.getFirstChild();
+		n3 = n3.firstChild();
 		assertEquals("texto", n3.innerText());
 		n3.setInnerText("nuevo");
 		assertEquals("nuevo", n3.innerText());
@@ -201,12 +265,22 @@ public class TestXmlTiny {
 	@Test
 	public void testTextAttributes() {
 		String xml = "<root><elem1>txt</elem1></root>";
-		XNode n = new XNode(xml).getChild("elem1").getFirstChild();
+		XNode n = new XNode(xml).getChild("elem1").firstChild();
 		// set attribute does not have any effect, get returns empty
 		n.setAttribute("none", "empty");
 		assertEquals("", n.getAttribute("none"));
 	}
 
+	@Test
+	public void testClone() {
+		String xml = "<root><elem1>txt</elem1></root>";
+		XNode n = new XNode(xml);
+		XNode clon = n.cloneNode();
+		// Same contents, but nodes are not the same
+		assertEquals(xml, clon.outerXml());
+		assertFalse(n.equals(clon));
+	}
+	
 	@Test
 	public void testEncodingFunctions() {
 		String text = "a<b>c&d\"e";
@@ -262,6 +336,103 @@ public class TestXmlTiny {
 		newNode = n.appendChild(n.createText("newtext"));
 		assertEquals("newtext", newNode.innerText());
 		assertEquals("<root>text<aftertext />newtext</root>", n.outerXml());
+	}
+
+	@Test
+	public void testChildPrepend() {
+		XNode n = new XNode("<root><elem1/></root>");
+		n.prependChild(n.createElement("new"));
+		assertEquals("<root><new /><elem1 /></root>", n.outerXml());
+		n = new XNode("<root></root>");
+		n.prependChild(n.createElement("new"));
+		assertEquals("<root><new /></root>", n.outerXml());
+	}
+	@Test
+	public void testChildInsert() {
+		String xml = "<root><elem1/>txt<elem2/></root>";
+		XNode n = new XNode(xml);
+		XNode n1 = n.firstChild();
+		XNode n2 = n.firstChild().nextSibling().nextSibling();
+		n1.insertAfter(n.createElement("e1a"));
+		n1.insertBefore(n.createElement("e1b"));
+		n2.insertAfter("e2a");
+		n2.insertBefore("e2b");
+		assertEquals("<root><e1b /><elem1 /><e1a />txt<e2b /><elem2 /><e2a /></root>", n.outerXml());
+	}
+	
+	@Test
+	public void testChildReplace() {
+		String xml = "<root><elem1/>txt<elem2/></root>";
+		XNode n = new XNode(xml);
+		XNode n2 = n.firstChild().nextSibling().nextSibling();
+		assertEquals("elem2", n2.name());
+		n.replaceChild(n.createNode("<new>newtext</new>"), n2);
+		assertEquals("new", n.firstChild().nextSibling().nextSibling().name());
+		assertEquals("<root><elem1 />txt<new>newtext</new></root>", n.outerXml());
+	}
+	@Test
+	public void testNormalize() {
+		String xml = "<root></root>";
+		XNode n = new XNode(xml);
+		n.appendChild(n.createText("text1"));
+		n.appendChild(n.createText("text2"));
+		//Consecutive text nodes are seen as one, but are different nodes
+		assertEquals("<root>text1text2</root>", n.outerXml());
+		assertEquals(2, n.childCount());
+		//after normalize are only one node
+		n.normalize();
+		assertEquals("<root>text1text2</root>", n.outerXml());
+		assertEquals(1, n.childCount());
+	}
+	
+	@Test
+	public void testChildRemoveAll() {
+		String xml = "<root><elem1/>txt</root>";
+		XNode n = new XNode(xml);
+		assertEquals(2, n.childCount());
+		// remove all
+		n.removeChildren();
+		assertEquals("root", n.name());
+		assertEquals(0, n.childCount());
+		
+		//set to empty, same effect
+		n = new XNode(xml);
+		n.setInnerXml("");
+		assertEquals("root", n.name());
+	}
+	
+	@Test
+	public void testChildRemoveSingle() {
+		//remove individual children (element and text)
+		String xml = "<root><elem1/>txt</root>";
+		XNode n = new XNode(xml);
+		n.removeChild(n.firstChild());
+		assertEquals("<root>txt</root>", n.outerXml());
+		n.removeChild(n.firstChild());
+		assertEquals("root", n.name());
+	}
+	
+	@Test
+	public void testMixedDocuments() {
+		XNode main=new XNode("<main><elem/></main>");
+		
+		//node created under a different document can't be added
+		XNode external=new XNode("<ext><subelem/></ext>");
+		try {
+			main.appendChild(external);
+			fail("Should fail");
+		} catch (RuntimeException e) {
+		}
+		//But works if the new node is imported
+		main=new XNode("<main><elem/></main>");
+		main.appendChild(main.importNode(external));
+		assertEquals("<main><elem /><ext><subelem /></ext></main>", main.outerXml());
+		
+		//or if the new node is created from the main node
+		main=new XNode("<main><elem/></main>");
+		XNode created=main.createNode("<cre><subelem/></cre>");
+		main.appendChild(created);
+		assertEquals("<main><elem /><cre><subelem /></cre></main>", main.outerXml());
 	}
 
 }
