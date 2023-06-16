@@ -102,7 +102,7 @@ public class FileUtil {
 	}
 	private static File[] listMatchingWildcard(String folder, String fileNameWildcard) {
 		File dir = new File(folder);
-		FileFilter fileFilter = new WildcardFileFilter(fileNameWildcard);
+		FileFilter fileFilter = WildcardFileFilter.builder().setWildcards(fileNameWildcard).get();
 		return dir.listFiles(fileFilter);
 	}
 	public static List<String> getFileListInDirectory(String path) {
