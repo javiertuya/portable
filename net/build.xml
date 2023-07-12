@@ -60,6 +60,10 @@
       <fileset dir="../java/src/test/java" >
       </fileset>
     </copy>
+    <replace dir="sharpen-temp/java">
+      <include name="giis*/**" />
+      <replacefilter token="WildcardFileFilter.builder().setWildcards(fileNameWildcard).get()" value="new WildcardFileFilter(fileNameWildcard)" />
+    </replace>
     <mkdir dir="sharpen-temp/lib" />
 
     <!-- Other libraries to resolve depenencies when executing sharpen (delcared in sharpen-all-options.txt) -->

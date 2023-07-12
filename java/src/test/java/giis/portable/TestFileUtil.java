@@ -54,7 +54,9 @@ public class TestFileUtil {
 		String path = getNewTempDirectory();
 
 		FileUtil.fileWrite(path + "/test.txt", "111");
+		FileUtil.createDirectory(path + "/this-is-a-folder");
 		FileUtil.fileWrite(path + "/test3.txt", "333");
+		FileUtil.createDirectory(path + "/test3.folder");
 		FileUtil.fileWrite(path + "/test2.txt", "222");
 
 		// contents of the directory (list and delete), must be sorted by name

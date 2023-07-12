@@ -96,7 +96,8 @@ public class FileUtil {
 		File[] files = listMatchingWildcard(folder, fileNameWildcard);
 		List<String> names = new ArrayList<>();
 		for (File file : files)
-			names.add(file.getName());
+			if (!file.isDirectory())
+				names.add(file.getName());
 		Collections.sort(names); // to make it repetible (linux returns different order than windows)
 		return names;
 	}
@@ -110,7 +111,8 @@ public class FileUtil {
 		try {
 			File dir = new File(path);
 			for (File file : dir.listFiles()) {
-				lst.add(file.getName());
+				if (!file.isDirectory())
+					lst.add(file.getName());
 			}
 		} catch (RuntimeException e) {
 			throw new PortableException("Can't browse directory at path " + path);

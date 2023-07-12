@@ -50,6 +50,7 @@ namespace Giis.Portable
 			string path = GetNewTempDirectory();
 			FileUtil.FileWrite(path + "/test.txt", "111");
 			FileUtil.FileWrite(path + "/test3.txt", "333");
+			FileUtil.CreateDirectory(path + "/test3.folder");
 			FileUtil.FileWrite(path + "/test2.txt", "222");
 			// contents of the directory (list and delete), must be sorted by name
 			IList<string> fileList = FileUtil.GetFileListInDirectory(path);
