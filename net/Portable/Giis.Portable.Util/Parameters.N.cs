@@ -28,13 +28,12 @@ namespace Giis.Portable.Util
             //No hay forma estandar de determinar si se esta ejecutando en entorno hosted (web) o no (consola o test)
             //por lo que primero examina una variable de entorno que si esta configurada determina la ruta relativa a la raiz
             //(usado cuando se ejecuta en containers)
+            //Los metodos como usar HostingEnvironment comprobando IsHosted requieren las librerias de asp.net
             string envRoot = System.Environment.GetEnvironmentVariable("HOSTED_APP_ROOT");
             if (!string.IsNullOrEmpty(envRoot))
-            {
                 ProjectRoot = envRoot;
-                return;
-            }
-            ProjectRoot = DefaultProjectRoot;
+            else
+                ProjectRoot = DefaultProjectRoot;
             ReportSubdir = DefaultReportSubdir;
         }
 
