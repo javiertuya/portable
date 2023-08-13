@@ -49,6 +49,7 @@ namespace Giis.Portable
 		{
 			string path = GetNewTempDirectory();
 			FileUtil.FileWrite(path + "/test.txt", "111");
+			FileUtil.CreateDirectory(path + "/this-is-a-folder");
 			FileUtil.FileWrite(path + "/test3.txt", "333");
 			FileUtil.CreateDirectory(path + "/test3.folder");
 			FileUtil.FileWrite(path + "/test2.txt", "222");
