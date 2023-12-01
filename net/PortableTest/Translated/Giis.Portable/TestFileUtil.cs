@@ -25,23 +25,23 @@ namespace Giis.Portable
 		{
 			string path = GetNewTempDirectory();
 			FileUtil.FileWrite(path + "/test.txt", "xxx");
-			NUnit.Framework.Assert.AreEqual("xxx", FileUtil.FileRead(path + "/test.txt"));
+			NUnit.Framework.Legacy.ClassicAssert.AreEqual("xxx", FileUtil.FileRead(path + "/test.txt"));
 			// overwrite existingfile
 			FileUtil.FileWrite(path, "test.txt", "abc\ndef");
-			NUnit.Framework.Assert.AreEqual("abc\ndef", FileUtil.FileRead(path, "test.txt"));
-			NUnit.Framework.Assert.AreEqual("abc\ndef", FileUtil.FileRead(path + "/test.txt"));
+			NUnit.Framework.Legacy.ClassicAssert.AreEqual("abc\ndef", FileUtil.FileRead(path, "test.txt"));
+			NUnit.Framework.Legacy.ClassicAssert.AreEqual("abc\ndef", FileUtil.FileRead(path + "/test.txt"));
 			IList<string> lines = FileUtil.FileReadLines(path, "test.txt");
-			NUnit.Framework.Assert.AreEqual(2, lines.Count);
-			NUnit.Framework.Assert.AreEqual("abc", lines[0]);
-			NUnit.Framework.Assert.AreEqual("def", lines[1]);
+			NUnit.Framework.Legacy.ClassicAssert.AreEqual(2, lines.Count);
+			NUnit.Framework.Legacy.ClassicAssert.AreEqual("abc", lines[0]);
+			NUnit.Framework.Legacy.ClassicAssert.AreEqual("def", lines[1]);
 			// append and copy
 			FileUtil.FileAppend(path, "test.txt", "\nxyz");
-			NUnit.Framework.Assert.AreEqual("abc\ndef\nxyz", FileUtil.FileRead(path, "test.txt"));
+			NUnit.Framework.Legacy.ClassicAssert.AreEqual("abc\ndef\nxyz", FileUtil.FileRead(path, "test.txt"));
 			FileUtil.FileAppend(path, "test2.txt", "\nxyz");
 			// creates file if does not exist
-			NUnit.Framework.Assert.AreEqual("\nxyz", FileUtil.FileRead(path, "test2.txt"));
+			NUnit.Framework.Legacy.ClassicAssert.AreEqual("\nxyz", FileUtil.FileRead(path, "test2.txt"));
 			FileUtil.CopyFile(path + "/test.txt", path + "/test3.txt");
-			NUnit.Framework.Assert.AreEqual("abc\ndef\nxyz", FileUtil.FileRead(path, "test3.txt"));
+			NUnit.Framework.Legacy.ClassicAssert.AreEqual("abc\ndef\nxyz", FileUtil.FileRead(path, "test3.txt"));
 		}
 
 		[Test]
@@ -55,22 +55,22 @@ namespace Giis.Portable
 			FileUtil.FileWrite(path + "/test2.txt", "222");
 			// contents of the directory (list and delete), must be sorted by name
 			IList<string> fileList = FileUtil.GetFileListInDirectory(path);
-			NUnit.Framework.Assert.AreEqual("[test.txt, test2.txt, test3.txt]", JavaCs.DeepToString(JavaCs.ToArray(fileList)));
+			NUnit.Framework.Legacy.ClassicAssert.AreEqual("[test.txt, test2.txt, test3.txt]", JavaCs.DeepToString(JavaCs.ToArray(fileList)));
 			fileList = FileUtil.GetFilesMatchingWildcard(path, "*.*");
-			NUnit.Framework.Assert.AreEqual("[test.txt, test2.txt, test3.txt]", JavaCs.DeepToString(JavaCs.ToArray(fileList)));
+			NUnit.Framework.Legacy.ClassicAssert.AreEqual("[test.txt, test2.txt, test3.txt]", JavaCs.DeepToString(JavaCs.ToArray(fileList)));
 			fileList = FileUtil.GetFilesMatchingWildcard(path, "test2.*");
-			NUnit.Framework.Assert.AreEqual("[test2.txt]", JavaCs.DeepToString(JavaCs.ToArray(fileList)));
+			NUnit.Framework.Legacy.ClassicAssert.AreEqual("[test2.txt]", JavaCs.DeepToString(JavaCs.ToArray(fileList)));
 			fileList = FileUtil.GetFilesMatchingWildcard(FileUtil.GetFullPath(path), "test3.*");
-			NUnit.Framework.Assert.AreEqual("[test3.txt]", JavaCs.DeepToString(JavaCs.ToArray(fileList)));
+			NUnit.Framework.Legacy.ClassicAssert.AreEqual("[test3.txt]", JavaCs.DeepToString(JavaCs.ToArray(fileList)));
 			FileUtil.DeleteFilesInDirectory(path);
 			fileList = FileUtil.GetFileListInDirectory(path);
-			NUnit.Framework.Assert.AreEqual("[]", JavaCs.DeepToString(JavaCs.ToArray(fileList)));
+			NUnit.Framework.Legacy.ClassicAssert.AreEqual("[]", JavaCs.DeepToString(JavaCs.ToArray(fileList)));
 		}
 
 		[Test]
 		public virtual void TestReadFileDoesNotExist()
 		{
-			NUnit.Framework.Assert.IsNull(FileUtil.FileRead("target", "file-does-not-exist.tmp", false));
+			NUnit.Framework.Legacy.ClassicAssert.IsNull(FileUtil.FileRead("target", "file-does-not-exist.tmp", false));
 			try
 			{
 				FileUtil.FileRead("target", "file-does-not-exist.tmp", true);
@@ -129,18 +129,18 @@ namespace Giis.Portable
 			string testpaths = FileUtil.GetPath("target", "test-paths");
 			FileUtil.CreateDirectory(testpaths);
 			FileUtil.FileWrite(testpaths, "check.txt", "xxx");
-			NUnit.Framework.Assert.AreEqual("xxx", FileUtil.FileRead(FileUtil.GetPath(testpaths), "check.txt"));
+			NUnit.Framework.Legacy.ClassicAssert.AreEqual("xxx", FileUtil.FileRead(FileUtil.GetPath(testpaths), "check.txt"));
 			// relative after base
-			NUnit.Framework.Assert.AreEqual("xxx", FileUtil.FileRead(FileUtil.GetPath(testpaths, "."), "check.txt"));
-			NUnit.Framework.Assert.AreEqual("xxx", FileUtil.FileRead(FileUtil.GetPath(testpaths, "..", "test-paths"), "check.txt"));
-			NUnit.Framework.Assert.AreEqual("xxx", FileUtil.FileRead(FileUtil.GetPath(testpaths, "test-paths", ".."), "check.txt"));
+			NUnit.Framework.Legacy.ClassicAssert.AreEqual("xxx", FileUtil.FileRead(FileUtil.GetPath(testpaths, "."), "check.txt"));
+			NUnit.Framework.Legacy.ClassicAssert.AreEqual("xxx", FileUtil.FileRead(FileUtil.GetPath(testpaths, "..", "test-paths"), "check.txt"));
+			NUnit.Framework.Legacy.ClassicAssert.AreEqual("xxx", FileUtil.FileRead(FileUtil.GetPath(testpaths, "test-paths", ".."), "check.txt"));
 			// relative before base
 			string parentFull = FileUtil.GetFullPath(".").Replace("\\", "/");
 			// for windows compatibility
 			string[] parents = JavaCs.SplitByChar(parentFull, '/');
 			string parent = parents[parents.Length - 1];
-			NUnit.Framework.Assert.AreEqual("xxx", FileUtil.FileRead(FileUtil.GetPath(".", testpaths), "check.txt"));
-			NUnit.Framework.Assert.AreEqual("xxx", FileUtil.FileRead(FileUtil.GetPath("..", parent, testpaths), "check.txt"));
+			NUnit.Framework.Legacy.ClassicAssert.AreEqual("xxx", FileUtil.FileRead(FileUtil.GetPath(".", testpaths), "check.txt"));
+			NUnit.Framework.Legacy.ClassicAssert.AreEqual("xxx", FileUtil.FileRead(FileUtil.GetPath("..", parent, testpaths), "check.txt"));
 		}
 	}
 }

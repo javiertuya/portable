@@ -20,20 +20,20 @@ namespace Giis.Portable
 		{
 			if (Parameters.IsJava())
 			{
-				NUnit.Framework.Assert.AreEqual("java", Parameters.GetPlatformName());
-				NUnit.Framework.Assert.AreEqual(".", Parameters.GetProjectRoot());
-				NUnit.Framework.Assert.AreEqual("target", Parameters.GetReportSubdir());
+				NUnit.Framework.Legacy.ClassicAssert.AreEqual("java", Parameters.GetPlatformName());
+				NUnit.Framework.Legacy.ClassicAssert.AreEqual(".", Parameters.GetProjectRoot());
+				NUnit.Framework.Legacy.ClassicAssert.AreEqual("target", Parameters.GetReportSubdir());
 			}
 			if (Parameters.IsNetCore())
 			{
-				NUnit.Framework.Assert.AreEqual("netcore", Parameters.GetPlatformName());
-				NUnit.Framework.Assert.AreEqual("../../../..", Parameters.GetProjectRoot().Replace("\\", "/"));
-				NUnit.Framework.Assert.AreEqual("reports", Parameters.GetReportSubdir());
+				NUnit.Framework.Legacy.ClassicAssert.AreEqual("netcore", Parameters.GetPlatformName());
+				NUnit.Framework.Legacy.ClassicAssert.AreEqual("../../../..", Parameters.GetProjectRoot().Replace("\\", "/"));
+				NUnit.Framework.Legacy.ClassicAssert.AreEqual("reports", Parameters.GetReportSubdir());
 			}
 			Parameters.SetProjectRoot("custom-root");
-			NUnit.Framework.Assert.AreEqual("custom-root", Parameters.GetProjectRoot());
+			NUnit.Framework.Legacy.ClassicAssert.AreEqual("custom-root", Parameters.GetProjectRoot());
 			Parameters.SetReportSubdir("custom-subdir");
-			NUnit.Framework.Assert.AreEqual("custom-subdir", Parameters.GetReportSubdir());
+			NUnit.Framework.Legacy.ClassicAssert.AreEqual("custom-subdir", Parameters.GetReportSubdir());
 		}
 	}
 }

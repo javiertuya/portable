@@ -15,21 +15,21 @@ namespace Giis.Portable
 		{
 			string propFile = FileUtil.GetPath(Parameters.GetProjectRoot(), "..", "test-file.properties");
 			Properties prop = new PropertiesFactory().GetPropertiesFromFilename(propFile);
-			NUnit.Framework.Assert.AreEqual("psimple", prop.GetProperty("prop.simple"));
-			NUnit.Framework.Assert.AreEqual("pspaces", prop.GetProperty("prop.spaces"));
-			NUnit.Framework.Assert.AreEqual(string.Empty, prop.GetProperty("prop.empty"));
+			NUnit.Framework.Legacy.ClassicAssert.AreEqual("psimple", prop.GetProperty("prop.simple"));
+			NUnit.Framework.Legacy.ClassicAssert.AreEqual("pspaces", prop.GetProperty("prop.spaces"));
+			NUnit.Framework.Legacy.ClassicAssert.AreEqual(string.Empty, prop.GetProperty("prop.empty"));
 			// with defaults
-			NUnit.Framework.Assert.AreEqual("psimple", prop.GetProperty("prop.simple", "default"));
-			NUnit.Framework.Assert.AreEqual("default", prop.GetProperty("prop.doesnotexist", "default"));
+			NUnit.Framework.Legacy.ClassicAssert.AreEqual("psimple", prop.GetProperty("prop.simple", "default"));
+			NUnit.Framework.Legacy.ClassicAssert.AreEqual("default", prop.GetProperty("prop.doesnotexist", "default"));
 			// does not exist, without defaults
-			NUnit.Framework.Assert.IsNull(prop.GetProperty("prop.doesnotexist"));
+			NUnit.Framework.Legacy.ClassicAssert.IsNull(prop.GetProperty("prop.doesnotexist"));
 		}
 
 		[Test]
 		public virtual void TestPropertiesFromFileNotFound()
 		{
 			Properties prop = new PropertiesFactory().GetPropertiesFromFilename("does-not-exist.properties");
-			NUnit.Framework.Assert.IsNull(prop);
+			NUnit.Framework.Legacy.ClassicAssert.IsNull(prop);
 		}
 
 		// java only
@@ -42,7 +42,7 @@ namespace Giis.Portable
 			}
 			string propFile = "test-classpath.properties";
 			Properties prop = new PropertiesFactory().GetPropertiesFromClassPath(propFile);
-			NUnit.Framework.Assert.AreEqual("psimple", prop.GetProperty("prop.simple"));
+			NUnit.Framework.Legacy.ClassicAssert.AreEqual("psimple", prop.GetProperty("prop.simple"));
 		}
 
 		[Test]
@@ -53,7 +53,7 @@ namespace Giis.Portable
 				return;
 			}
 			Properties prop = new PropertiesFactory().GetPropertiesFromClassPath("does-not-exist.properties");
-			NUnit.Framework.Assert.IsNull(prop);
+			NUnit.Framework.Legacy.ClassicAssert.IsNull(prop);
 		}
 	}
 }
