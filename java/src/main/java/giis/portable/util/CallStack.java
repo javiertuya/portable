@@ -19,10 +19,23 @@ public class CallStack {
 		return stack[position].getClassName();
 	}
 	public String getMethodName(int position) {
-		return stack[position].getMethodName();
+		return position == 0 ? "" : stack[position].getMethodName();
 	}
 	public String getFileName(int position) {
 		return stack[position].getFileName();
+	}
+	/**
+	 * Gets the full file name of this class: 
+	 * - on java its path is relative to the source location,
+	 * - on .NET is an absolute path
+	 */
+	public String getFullFileName(int position) {
+		String[] nameItems = JavaCs.splitByDot(stack[position].getClassName());
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < nameItems.length - 1; i++)
+			sb.append(nameItems[i]).append("/");
+		sb.append(stack[position].getFileName());
+		return sb.toString();
 	}
 	public int getLineNumber(int position) {
 		return stack[position].getLineNumber();

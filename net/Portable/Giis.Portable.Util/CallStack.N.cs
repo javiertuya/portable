@@ -50,6 +50,8 @@ namespace Giis.Portable.Util
         }
         public string GetMethodName(int position)
         {
+            if (position == 0)
+                return ""; // no method available
             //La clase esta unida al metodo, busco todo y luego saco el ultimo componente
             string[] items = GetStackBetween(position, " at ", "(").Split('.'); //despues vienen los parametros
             string method = items[items.Length - 1];
@@ -64,12 +66,15 @@ namespace Giis.Portable.Util
         }
         public string GetFileName(int position)
         {
-            string fullName=GetStackBetween(position, " in ", ":line").Replace("\\","/");
-            string[] components = fullName.Split('/');
+            string[] components = GetFullFileName(position).Split('/');
             if (components.Length > 0)
                 return components[components.Length - 1];
             return "";
         }
+        public string GetFullFileName(int position)
+        {
+            return GetStackBetween(position, " in ", ":line").Replace("\\", "/");
+         }
         public string GetString()
         {
             StringWriter sw = new StringWriter();

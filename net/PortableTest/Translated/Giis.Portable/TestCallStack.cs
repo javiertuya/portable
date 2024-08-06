@@ -14,15 +14,70 @@ namespace Giis.Portable
 		{
 			CallStack stack = new CallStack();
 			NUnit.Framework.Legacy.ClassicAssert.IsTrue(stack.Size() > 2);
-			NUnit.Framework.Legacy.ClassicAssert.AreEqual("giis.portable.util.callstack", stack.GetClassName(0).ToLower());
-			NUnit.Framework.Legacy.ClassicAssert.AreEqual("callstack.java", stack.GetFileName(0).Replace(".N.cs", ".java").ToLower());
 			NUnit.Framework.Legacy.ClassicAssert.IsTrue(stack.GetLineNumber(0) > 0);
-			NUnit.Framework.Legacy.ClassicAssert.AreEqual("giis.portable.testcallstack", stack.GetClassName(1).ToLower());
-			NUnit.Framework.Legacy.ClassicAssert.AreEqual("teststackofthismethod", stack.GetMethodName(1).ToLower());
-			NUnit.Framework.Legacy.ClassicAssert.AreEqual("testcallstack.java", stack.GetFileName(1).Replace(".cs", ".java").ToLower());
 			NUnit.Framework.Legacy.ClassicAssert.IsTrue(stack.GetLineNumber(1) > 0);
 			NUnit.Framework.Legacy.ClassicAssert.IsTrue(stack.GetString().ToLower().Contains("giis.portable.util.callstack"));
 			NUnit.Framework.Legacy.ClassicAssert.IsTrue(stack.GetString().ToLower().Contains("giis.portable.testcallstack"));
+			if (Parameters.IsJava())
+			{
+				NUnit.Framework.Legacy.ClassicAssert.AreEqual("giis.portable.util.CallStack", stack.GetClassName(0));
+				NUnit.Framework.Legacy.ClassicAssert.AreEqual("CallStack.java", stack.GetFileName(0));
+				NUnit.Framework.Legacy.ClassicAssert.AreEqual("giis/portable/util/CallStack.java", stack.GetFullFileName(0));
+				NUnit.Framework.Legacy.ClassicAssert.AreEqual(string.Empty, stack.GetMethodName(0));
+				NUnit.Framework.Legacy.ClassicAssert.AreEqual("giis.portable.TestCallStack", stack.GetClassName(1));
+				NUnit.Framework.Legacy.ClassicAssert.AreEqual("TestCallStack.java", stack.GetFileName(1).Replace(".cs", ".java"));
+				NUnit.Framework.Legacy.ClassicAssert.AreEqual("giis/portable/TestCallStack.java", stack.GetFullFileName(1));
+				NUnit.Framework.Legacy.ClassicAssert.AreEqual("testStackOfThisMethod", stack.GetMethodName(1));
+			}
+			else
+			{
+				// net
+				NUnit.Framework.Legacy.ClassicAssert.AreEqual("Giis.Portable.Util.CallStack", stack.GetClassName(0));
+				NUnit.Framework.Legacy.ClassicAssert.AreEqual("CallStack.java", stack.GetFileName(0).Replace(".N.cs", ".java"));
+				NUnit.Framework.Legacy.ClassicAssert.IsTrue(stack.GetFullFileName(0).EndsWith("/Portable/Giis.Portable.Util/CallStack.N.cs"));
+				NUnit.Framework.Legacy.ClassicAssert.AreEqual(string.Empty, stack.GetMethodName(0));
+				NUnit.Framework.Legacy.ClassicAssert.AreEqual("Giis.Portable.TestCallStack", stack.GetClassName(1));
+				NUnit.Framework.Legacy.ClassicAssert.AreEqual("TestCallStack.cs", stack.GetFileName(1));
+				NUnit.Framework.Legacy.ClassicAssert.IsTrue(stack.GetFullFileName(1).EndsWith("/PortableTest/Translated/Giis.Portable/TestCallStack.cs"));
+				NUnit.Framework.Legacy.ClassicAssert.AreEqual("TestStackOfThisMethod", stack.GetMethodName(1));
+			}
+		}
+
+		[Test]
+		public virtual void TestStackOfInnerClass()
+		{
+			CallStack stack = new TestCallStack.InnerClass(this).GetCallStack();
+			NUnit.Framework.Legacy.ClassicAssert.IsTrue(stack.Size() > 2);
+			if (Parameters.IsJava())
+			{
+				NUnit.Framework.Legacy.ClassicAssert.AreEqual("giis.portable.util.CallStack", stack.GetClassName(0));
+				NUnit.Framework.Legacy.ClassicAssert.AreEqual("CallStack.java", stack.GetFileName(0));
+				NUnit.Framework.Legacy.ClassicAssert.AreEqual("giis/portable/util/CallStack.java", stack.GetFullFileName(0));
+				NUnit.Framework.Legacy.ClassicAssert.AreEqual(string.Empty, stack.GetMethodName(0));
+			}
+			else
+			{
+				// net
+				NUnit.Framework.Legacy.ClassicAssert.AreEqual("Giis.Portable.Util.CallStack", stack.GetClassName(0));
+				NUnit.Framework.Legacy.ClassicAssert.AreEqual("CallStack.java", stack.GetFileName(0).Replace(".N.cs", ".java"));
+				NUnit.Framework.Legacy.ClassicAssert.IsTrue(stack.GetFullFileName(0).EndsWith("/Portable/Giis.Portable.Util/CallStack.N.cs"));
+				NUnit.Framework.Legacy.ClassicAssert.AreEqual(string.Empty, stack.GetMethodName(0));
+			}
+		}
+
+		public class InnerClass
+		{
+			public virtual CallStack GetCallStack()
+			{
+				return new CallStack();
+			}
+
+			internal InnerClass(TestCallStack _enclosing)
+			{
+				this._enclosing = _enclosing;
+			}
+
+			private readonly TestCallStack _enclosing;
 		}
 	}
 }
