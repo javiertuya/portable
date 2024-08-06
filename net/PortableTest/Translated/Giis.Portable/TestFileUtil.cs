@@ -127,6 +127,18 @@ namespace Giis.Portable
 		}
 
 		[Test]
+		public virtual void TestGetPath()
+		{
+			// getPath uses apache commons to concatenate paths, but returns null
+			// if first parameter is relative.
+			// Check that patch to solve this works
+			NUnit.Framework.Legacy.ClassicAssert.IsTrue(FileUtil.GetPath("aa", "xx").Replace("\\", "/").EndsWith("aa/xx"));
+			NUnit.Framework.Legacy.ClassicAssert.IsTrue(FileUtil.GetPath("./aa", "xx").Replace("\\", "/").EndsWith("aa/xx"));
+			NUnit.Framework.Legacy.ClassicAssert.IsTrue(FileUtil.GetPath("../bb/aa", "xx").Replace("\\", "/").EndsWith("bb/aa/xx"));
+			NUnit.Framework.Legacy.ClassicAssert.IsTrue(FileUtil.GetPath("../../bb/aa", "xx").Replace("\\", "/").EndsWith("bb/aa/xx"));
+		}
+
+		[Test]
 		public virtual void TestRelativePaths()
 		{
 			// file located in a path that must be always available when reading using

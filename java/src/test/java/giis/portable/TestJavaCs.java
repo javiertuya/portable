@@ -75,14 +75,23 @@ public class TestJavaCs {
 	}
 
 	@Test
-	public void testIsEmpty() {
+	public void testIsEmptyString() {
 		assertFalse(JavaCs.isEmpty("x"));
 		assertTrue(JavaCs.isEmpty(""));
-		assertTrue(JavaCs.isEmpty(null));
+		assertTrue(JavaCs.isEmpty((String)null));
 		// whitespace/control chars also return empty (C# isEmptyOrWhiteSpace)
 		assertTrue(JavaCs.isEmpty(" "));
 		assertTrue(JavaCs.isEmpty("\n"));
 		assertTrue(JavaCs.isEmpty("\n "));
+	}
+
+	@Test
+	public void testIsEmptyList() {
+		List<String> lst=new ArrayList<>();
+		assertTrue(JavaCs.isEmpty(lst));
+		assertTrue(JavaCs.isEmpty((List<String>)null));
+		lst.add("txt");
+		assertFalse(JavaCs.isEmpty(lst));
 	}
 
 	@Test

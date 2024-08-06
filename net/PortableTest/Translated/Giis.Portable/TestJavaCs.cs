@@ -84,15 +84,25 @@ namespace Giis.Portable
 		}
 
 		[Test]
-		public virtual void TestIsEmpty()
+		public virtual void TestIsEmptyString()
 		{
 			NUnit.Framework.Legacy.ClassicAssert.IsFalse(JavaCs.IsEmpty("x"));
 			NUnit.Framework.Legacy.ClassicAssert.IsTrue(JavaCs.IsEmpty(string.Empty));
-			NUnit.Framework.Legacy.ClassicAssert.IsTrue(JavaCs.IsEmpty(null));
+			NUnit.Framework.Legacy.ClassicAssert.IsTrue(JavaCs.IsEmpty((string)null));
 			// whitespace/control chars also return empty (C# isEmptyOrWhiteSpace)
 			NUnit.Framework.Legacy.ClassicAssert.IsTrue(JavaCs.IsEmpty(" "));
 			NUnit.Framework.Legacy.ClassicAssert.IsTrue(JavaCs.IsEmpty("\n"));
 			NUnit.Framework.Legacy.ClassicAssert.IsTrue(JavaCs.IsEmpty("\n "));
+		}
+
+		[Test]
+		public virtual void TestIsEmptyList()
+		{
+			IList<string> lst = new List<string>();
+			NUnit.Framework.Legacy.ClassicAssert.IsTrue(JavaCs.IsEmpty(lst));
+			NUnit.Framework.Legacy.ClassicAssert.IsTrue(JavaCs.IsEmpty((IList<string>)null));
+			lst.Add("txt");
+			NUnit.Framework.Legacy.ClassicAssert.IsFalse(JavaCs.IsEmpty(lst));
 		}
 
 		[Test]
