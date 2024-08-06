@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.InteropServices.ComTypes;
 
 namespace Giis.Portable.Util
 {
@@ -32,6 +33,14 @@ namespace Giis.Portable.Util
         }
         public static List<string> FileReadLines(string fileName)
         {
+            return FileReadLines(fileName, true);
+        }
+        public static List<string> FileReadLines(string path, string name)
+        {
+            return FileReadLines(Path.Combine(path, name), true);
+        }
+        public static List<string> FileReadLines(string fileName, bool throwIfNotExists)
+        {
             try
             {
                 string[] linesArray = File.ReadAllLines(fileName);
@@ -39,12 +48,14 @@ namespace Giis.Portable.Util
             }
             catch (Exception e)
             {
+                if (!throwIfNotExists)
+                    return new List<string>();
                 throw new PortableException("Error reading file " + fileName, e);
             }
         }
-        public static List<string> FileReadLines(string path, string name)
+        public static List<string> FileReadLines(string path, string name, bool throwIfNotExists)
         {
-            return FileReadLines(Path.Combine(path, name));
+            return FileReadLines(Path.Combine(path, name), throwIfNotExists);
         }
 
         public static void FileWrite(string path, string name, string content)

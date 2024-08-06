@@ -44,15 +44,24 @@ public class FileUtil {
 	public static String fileRead(String fileName) {
 		return fileRead(fileName, true);
 	}
-	public static List<String> fileReadLines(String path, String name) {
-		return fileReadLines(getPath(path, name));
-	}
+	
 	public static List<String> fileReadLines(String fileName) {
+		return fileReadLines(fileName, true);
+	}
+	public static List<String> fileReadLines(String path, String name) {
+		return fileReadLines(getPath(path, name), true);
+	}
+	public static List<String> fileReadLines(String fileName, boolean throwIfNotExists) {
 		try {
 			return FileUtils.readLines(new File(fileName), UTF_8);
 		} catch (IOException e) {
+			if (!throwIfNotExists)
+				return new ArrayList<>();
 			throw new PortableException("Error reading file " + fileName, e);
 		}
+	}
+	public static List<String> fileReadLines(String path, String name, boolean throwIfNotExists) {
+		return fileReadLines(getPath(path, name), throwIfNotExists);
 	}
 
 	public static void fileWrite(String path, String name, String content) {

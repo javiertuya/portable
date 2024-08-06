@@ -34,6 +34,10 @@ namespace Giis.Portable
 			NUnit.Framework.Legacy.ClassicAssert.AreEqual(2, lines.Count);
 			NUnit.Framework.Legacy.ClassicAssert.AreEqual("abc", lines[0]);
 			NUnit.Framework.Legacy.ClassicAssert.AreEqual("def", lines[1]);
+			IList<string> lines2 = FileUtil.FileReadLines(path + "/test.txt");
+			NUnit.Framework.Legacy.ClassicAssert.AreEqual(2, lines2.Count);
+			NUnit.Framework.Legacy.ClassicAssert.AreEqual("abc", lines[0]);
+			NUnit.Framework.Legacy.ClassicAssert.AreEqual("def", lines[1]);
 			// append and copy
 			FileUtil.FileAppend(path, "test.txt", "\nxyz");
 			NUnit.Framework.Legacy.ClassicAssert.AreEqual("abc\ndef\nxyz", FileUtil.FileRead(path, "test.txt"));
@@ -84,9 +88,10 @@ namespace Giis.Portable
 		[Test]
 		public virtual void TestReadLinesDoesNotExist()
 		{
+			NUnit.Framework.Legacy.ClassicAssert.AreEqual(0, FileUtil.FileReadLines("target", "file-does-not-exist.tmp", false).Count);
 			try
 			{
-				FileUtil.FileReadLines("target", "file-does-not-exist.tmp");
+				FileUtil.FileReadLines("target", "file-does-not-exist.tmp", true);
 				NUnit.Framework.Assert.Fail("Should raise exception");
 			}
 			catch (Exception)

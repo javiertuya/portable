@@ -38,6 +38,11 @@ public class TestFileUtil {
 		assertEquals("abc", lines.get(0));
 		assertEquals("def", lines.get(1));
 
+		List<String> lines2 = FileUtil.fileReadLines(path + "/test.txt");
+		assertEquals(2, lines2.size());
+		assertEquals("abc", lines.get(0));
+		assertEquals("def", lines.get(1));
+
 		// append and copy
 		FileUtil.fileAppend(path, "test.txt", "\nxyz");
 		assertEquals("abc\ndef\nxyz", FileUtil.fileRead(path, "test.txt"));
@@ -87,8 +92,9 @@ public class TestFileUtil {
 	}
 	@Test
 	public void testReadLinesDoesNotExist() {
+		assertEquals(0, FileUtil.fileReadLines("target", "file-does-not-exist.tmp", false).size());
 		try {
-			FileUtil.fileReadLines("target", "file-does-not-exist.tmp");
+			FileUtil.fileReadLines("target", "file-does-not-exist.tmp", true);
 			fail("Should raise exception");
 		} catch (RuntimeException e) {
 		}
