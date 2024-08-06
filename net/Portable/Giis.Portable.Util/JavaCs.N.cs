@@ -68,6 +68,10 @@ namespace Giis.Portable.Util
         {
             return string.IsNullOrWhiteSpace(str);
         }
+        public static bool IsEmpty(IList<string> lst)
+        {
+            return lst == null || lst.Count == 0;   
+        }
 
         /// <summary>
         /// Replacement using a regular expression (java replaceAll), needed because in

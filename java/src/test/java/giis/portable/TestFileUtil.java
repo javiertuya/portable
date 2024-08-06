@@ -2,6 +2,7 @@ package giis.portable;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.List;
@@ -114,6 +115,17 @@ public class TestFileUtil {
 			fail("Should raise exception");
 		} catch (RuntimeException e) {
 		}
+	}
+
+	@Test
+	public void testGetPath() {
+		// getPath uses apache commons to concatenate paths, but returns null
+		// if first parameter is relative.
+		// Check that patch to solve this works
+		assertTrue(FileUtil.getPath("aa", "xx").replace("\\", "/").endsWith("aa/xx"));
+		assertTrue(FileUtil.getPath("./aa", "xx").replace("\\", "/").endsWith("aa/xx"));
+		assertTrue(FileUtil.getPath("../bb/aa", "xx").replace("\\", "/").endsWith("bb/aa/xx"));
+		assertTrue(FileUtil.getPath("../../bb/aa", "xx").replace("\\", "/").endsWith("bb/aa/xx"));
 	}
 
 	@Test

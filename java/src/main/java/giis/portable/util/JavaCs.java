@@ -56,6 +56,9 @@ public class JavaCs {
 	public static boolean isEmpty(String str) {
 		return str == null || "".equals(str.trim());
 	}
+	public static boolean isEmpty(List<String> lst) {
+		return lst == null || lst.isEmpty();
+	}
 
 	/**
 	 * Replacement using a regular expression (java replaceAll), needed because in
