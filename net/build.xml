@@ -8,7 +8,7 @@
   <!-- En vez de hacer import directo de la url, hace un get primero para descargar en local los archivos
   usetimestamp para comprobar por fecha, skipexisting para comprobar si ya existe el fichero-->
   <mkdir dir="packages" />
-  <property name="ant-util-url" value="https://in4test.lsi.uniovi.es/xlib/ant-util-master" />
+  <property name="ant-util-url" value="https://in2test.lsi.uniovi.es/xlib/ant-util-master" />
   <get src="${ant-util-url}/ant.netcore.xml" dest="packages/ant.netcore.xml" usetimestamp="true" />
   <import file="packages/ant.netcore.xml"/>
 
