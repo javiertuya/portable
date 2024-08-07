@@ -68,6 +68,7 @@ public class TestResolve {
 				prefix = prefix + "/";
 			System.out.println(prefix);
 			System.out.println(sourceFile);
+			System.out.println(sourceFile.startsWith(prefix));
 			if (sourceFile.startsWith(prefix))
 				sourceFile = JavaCs.substring(sourceFile, prefix.length(), sourceFile.length());
 			else

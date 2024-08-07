@@ -77,6 +77,7 @@ namespace Giis.Portable
 				}
 				System.Console.Out.WriteLine(prefix);
 				System.Console.Out.WriteLine(sourceFile);
+				System.Console.Out.WriteLine(sourceFile.StartsWith(prefix));
 				if (sourceFile.StartsWith(prefix))
 				{
 					sourceFile = JavaCs.Substring(sourceFile, prefix.Length, sourceFile.Length);
