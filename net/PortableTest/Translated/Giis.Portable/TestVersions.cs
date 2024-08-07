@@ -17,7 +17,7 @@ namespace Giis.Portable
 			string version = new Versions(new PortableException(string.Empty).GetType(), "io.github.javiertuya", "portable-java").GetVersion();
 			string[] items = JavaCs.SplitByDot(version);
 			NUnit.Framework.Legacy.ClassicAssert.AreEqual("2", items[0]);
-			NUnit.Framework.Legacy.ClassicAssert.AreEqual("2", items[1]);
+			NUnit.Framework.Legacy.ClassicAssert.AreEqual("3", items[1]);
 			// java only, does not need specify any class
 			if (Parameters.IsJava())
 			{
