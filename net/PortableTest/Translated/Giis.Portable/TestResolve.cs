@@ -57,6 +57,7 @@ namespace Giis.Portable
 
 		public virtual string ResolveSourcePath(string sourceFolder, string projectFolder, string sourceFile)
 		{
+			System.Console.Out.WriteLine("Resolve: " + sourceFolder + " " + projectFolder + " " + sourceFile);
 			sourceFolder = JavaCs.IsEmpty(sourceFolder) ? string.Empty : sourceFolder.Trim();
 			projectFolder = JavaCs.IsEmpty(projectFolder) ? string.Empty : projectFolder.Trim();
 			sourceFile = JavaCs.IsEmpty(sourceFile) ? string.Empty : sourceFile.Trim();

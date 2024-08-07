@@ -51,6 +51,7 @@ public class TestResolve {
 	}
 	
 	public String resolveSourcePath(String sourceFolder, String projectFolder, String sourceFile) {
+		System.out.println("Resolve: "+sourceFolder+" "+projectFolder+" "+sourceFile);
 		sourceFolder = JavaCs.isEmpty(sourceFolder) ? "" : sourceFolder.trim();
 		projectFolder = JavaCs.isEmpty(projectFolder) ? "" : projectFolder.trim();
 		sourceFile = JavaCs.isEmpty(sourceFile) ? "" : sourceFile.trim();
