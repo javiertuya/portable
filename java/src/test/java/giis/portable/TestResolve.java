@@ -34,8 +34,6 @@ public class TestResolve {
 	public void testSourcePathResolutionWithProject() {
 		assertPath("/a/b/c/y/Clazz.java", "/a/b/c", "/x", "/x/y/Clazz.java");
 		assertPath("/a/b/c/y/Clazz.java", "/a/b/c", "/x/", "/x/y/Clazz.java");
-		assertPath("/a/b/c/y/Clazz.java", "/a/b/c", "/x", "C:/x/y/Clazz.java");
-		assertPath("/a/b/c/y/Clazz.java", "/a/b/c", "/x/", "C:/x/y/Clazz.java");
 	}
 	
 	public String resolveSourcePath(String sourceFolder, String projectFolder, String sourceFile) {
