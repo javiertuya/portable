@@ -38,6 +38,11 @@ namespace Giis.Portable
 			AssertPath("/a/b/c/y/Clazz.java", "/a/b/c", "\\x", "/x/y/Clazz.java");
 			AssertPath("/a/b/c/y/Clazz.java", "/a/b/c", "\\x\\", "/x/y/Clazz.java");
 			AssertPath("/a/b/c/y/Clazz.java", "/a/b/c", "\\x\\", "\\x\\y\\Clazz.java");
+		}
+
+		[Test]
+		public virtual void TestSourcePathResolutionNotResolved()
+		{
 			// project folder not included in full path, not found
 			AssertPath(string.Empty, "/a/b/c", "/w", "/x/y/Clazz.java");
 		}

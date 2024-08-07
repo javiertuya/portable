@@ -37,7 +37,9 @@ public class TestResolve {
 		assertPath("/a/b/c/y/Clazz.java", "/a/b/c", "\\x", "/x/y/Clazz.java");
 		assertPath("/a/b/c/y/Clazz.java", "/a/b/c", "\\x\\", "/x/y/Clazz.java");
 		assertPath("/a/b/c/y/Clazz.java", "/a/b/c", "\\x\\", "\\x\\y\\Clazz.java");
-		
+	}
+	@Test
+	public void testSourcePathResolutionNotResolved() {
 		// project folder not included in full path, not found
 		assertPath("", "/a/b/c", "/w", "/x/y/Clazz.java");
 	}
