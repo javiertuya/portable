@@ -63,10 +63,12 @@ public class TestResolve {
 		// If projectFolder specified (for net generated coverage), it is expected a full path source File
 		// that is converted to relative to projectFolder
 		if (!"".equals(projectFolder)) {
-			sourceFile = FileUtil.getFullPath(sourceFile).replace("\\", "/");
-			String prefix = FileUtil.getFullPath(projectFolder).replace("\\", "/");
+			// unifies separators (linux/windows) and simplifies double separators that appear sometimes
+			sourceFile = FileUtil.getFullPath(sourceFile.replace("\\", "/")).replace("\\", "/").replace("//", "/");
+			String prefix = FileUtil.getFullPath(projectFolder.replace("\\", "/")).replace("\\", "/").replace("//", "/");
 			if (!prefix.endsWith("/"))
 				prefix = prefix + "/";
+			
 			System.out.println(prefix);
 			System.out.println(sourceFile);
 			System.out.println(sourceFile.startsWith(prefix));

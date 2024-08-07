@@ -70,8 +70,9 @@ namespace Giis.Portable
 			// that is converted to relative to projectFolder
 			if (!string.Empty.Equals(projectFolder))
 			{
-				sourceFile = FileUtil.GetFullPath(sourceFile).Replace("\\", "/");
-				string prefix = FileUtil.GetFullPath(projectFolder).Replace("\\", "/");
+				// unifies separators (linux/windows) and simplifies double separators that appear sometimes
+				sourceFile = FileUtil.GetFullPath(sourceFile.Replace("\\", "/")).Replace("\\", "/").Replace("//", "/");
+				string prefix = FileUtil.GetFullPath(projectFolder.Replace("\\", "/")).Replace("\\", "/").Replace("//", "/");
 				if (!prefix.EndsWith("/"))
 				{
 					prefix = prefix + "/";
