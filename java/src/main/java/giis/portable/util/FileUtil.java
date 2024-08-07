@@ -3,8 +3,6 @@ package giis.portable.util;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -169,16 +167,6 @@ public class FileUtil {
 		} catch (IOException e) {
 			throw new PortableException("Error getting full path of " + path, e);
 		}
-	}
-	
-	/** 
-	 * Returns a relative filename path from a path (relativeTo) to a file name (thisFile)
-	 */
-	public static String getPathRelativeTo(String thisFile, String relativeTo) {
-		thisFile = getFullPath(thisFile);
-		relativeTo = getFullPath(relativeTo);
-		Path relative = Paths.get(relativeTo).relativize(Paths.get(thisFile));
-		return relative.toString();
 	}
 
 	public static void createDirectory(String path) {

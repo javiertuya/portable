@@ -149,36 +149,5 @@ public class TestFileUtil {
 		assertEquals("xxx", FileUtil.fileRead(FileUtil.getPath(".", testpaths), "check.txt"));
 		assertEquals("xxx", FileUtil.fileRead(FileUtil.getPath("..", parent, testpaths), "check.txt"));
 	}
-	
-	@Test
-	public void testRelativizePathLinuxSeparator() {
-		// upper, folder, sibling folder
-		assertEquals("c/Clazz.java", FileUtil.getPathRelativeTo("a/b/c/Clazz.java", "a/b").replace("\\", "/"));
-		assertEquals("../Clazz.java", FileUtil.getPathRelativeTo("a/b/c/Clazz.java", "a/b/c/d").replace("\\", "/"));
-		assertEquals("../../c/Clazz.java", FileUtil.getPathRelativeTo("a/b/c/Clazz.java", "a/b/x/y").replace("\\", "/"));
-		// ending slash
-		assertEquals("c/Clazz.java", FileUtil.getPathRelativeTo("a/b/c/Clazz.java", "a/b/").replace("\\", "/"));
-		assertEquals("../Clazz.java", FileUtil.getPathRelativeTo("a/b/c/Clazz.java", "a/b/c/d/").replace("\\", "/"));
-		assertEquals("../../c/Clazz.java", FileUtil.getPathRelativeTo("a/b/c/Clazz.java", "a/b/x/y/").replace("\\", "/"));
-		// absolute file name
-		assertEquals("c/Clazz.java", FileUtil.getPathRelativeTo(FileUtil.getFullPath("a/b/c/Clazz.java"), FileUtil.getFullPath("a/b")).replace("\\", "/"));
-		assertEquals("../Clazz.java", FileUtil.getPathRelativeTo(FileUtil.getFullPath("a/b/c/Clazz.java"), FileUtil.getFullPath("a/b/c/d")).replace("\\", "/"));
-		assertEquals("../../c/Clazz.java", FileUtil.getPathRelativeTo(FileUtil.getFullPath("a/b/c/Clazz.java"), FileUtil.getFullPath("a/b/x/y")).replace("\\", "/"));
-	}
-	@Test
-	public void testRelativizePathWindowsSeparator() {
-		// upper, folder, sibling folder
-		assertEquals("c/Clazz.java", FileUtil.getPathRelativeTo("a\\b\\c\\Clazz.java", "a\\b").replace("\\", "/"));
-		assertEquals("../Clazz.java", FileUtil.getPathRelativeTo("a\\b\\c\\Clazz.java", "a\\b\\c\\d").replace("\\", "/"));
-		assertEquals("../../c/Clazz.java", FileUtil.getPathRelativeTo("a\\b\\c\\Clazz.java", "a\\b\\x\\y").replace("\\", "/"));
-		// ending slash
-		assertEquals("c/Clazz.java", FileUtil.getPathRelativeTo("a\\b\\c\\Clazz.java", "a\\b\\").replace("\\", "/"));
-		assertEquals("../Clazz.java", FileUtil.getPathRelativeTo("a\\b\\c\\Clazz.java", "a\\b\\c\\d\\").replace("\\", "/"));
-		assertEquals("../../c/Clazz.java", FileUtil.getPathRelativeTo("a\\b\\c\\Clazz.java", "a\\b\\x\\y\\").replace("\\", "/"));
-		// absolute file name
-		assertEquals("c/Clazz.java", FileUtil.getPathRelativeTo(FileUtil.getFullPath("a\\b\\c\\Clazz.java"), FileUtil.getFullPath("a\\b")).replace("\\", "/"));
-		assertEquals("../Clazz.java", FileUtil.getPathRelativeTo(FileUtil.getFullPath("a\\b\\c\\Clazz.java"), FileUtil.getFullPath("a\\b\\c\\d")).replace("\\", "/"));
-		assertEquals("../../c/Clazz.java", FileUtil.getPathRelativeTo(FileUtil.getFullPath("a\\b\\c\\Clazz.java"), FileUtil.getFullPath("a\\b\\x\\y")).replace("\\", "/"));
-	}
 
 }
