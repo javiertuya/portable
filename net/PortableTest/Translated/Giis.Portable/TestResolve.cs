@@ -31,10 +31,23 @@ namespace Giis.Portable
 		}
 
 		[Test]
-		public virtual void TestSourcePathResolutionWithProject()
+		public virtual void TestSourcePathResolutionAbsoluteProjectLocation()
 		{
 			AssertPath("/a/b/c/y/Clazz.java", "/a/b/c", "/x", "/x/y/Clazz.java");
 			AssertPath("/a/b/c/y/Clazz.java", "/a/b/c", "/x/", "/x/y/Clazz.java");
+			AssertPath("/a/b/c/y/Clazz.java", "/a/b/c", "\\x", "/x/y/Clazz.java");
+			AssertPath("/a/b/c/y/Clazz.java", "/a/b/c", "\\x\\", "/x/y/Clazz.java");
+			AssertPath("/a/b/c/y/Clazz.java", "/a/b/c", "\\x\\", "\\x\\y\\Clazz.java");
+			// project folder not included in full path, not found
+			AssertPath(string.Empty, "/a/b/c", "/w", "/x/y/Clazz.java");
+		}
+
+		[Test]
+		public virtual void TestSourcePathResolutionRelativeProjectLocation()
+		{
+			AssertPath("/a/b/c/y/Clazz.java", "/a/b/c", "x", FileUtil.GetFullPath("x/y/Clazz.java"));
+			AssertPath("/a/b/c/y/Clazz.java", "/a/b/c", "x/", FileUtil.GetFullPath("x/y/Clazz.java"));
+			AssertPath("/a/b/c/y/Clazz.java", "/a/b/c", "./x", FileUtil.GetFullPath("x/y/Clazz.java"));
 		}
 
 		public virtual string ResolveSourcePath(string sourceFolder, string projectFolder, string sourceFile)
@@ -62,6 +75,10 @@ namespace Giis.Portable
 				if (sourceFile.StartsWith(prefix))
 				{
 					sourceFile = JavaCs.Substring(sourceFile, prefix.Length, sourceFile.Length);
+				}
+				else
+				{
+					return string.Empty;
 				}
 			}
 			return FileUtil.GetPath(sourceFolder, sourceFile);
