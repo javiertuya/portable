@@ -31,9 +31,21 @@ public class TestResolve {
 		assertPath(isJava ? full("x/y/Clazz.java") : "./x/y/Clazz.java", "./", "", "x/y/Clazz.java");
 	}
 	@Test
-	public void testSourcePathResolutionWithProject() {
+	public void testSourcePathResolutionAbsoluteProjectLocation() {
 		assertPath("/a/b/c/y/Clazz.java", "/a/b/c", "/x", "/x/y/Clazz.java");
 		assertPath("/a/b/c/y/Clazz.java", "/a/b/c", "/x/", "/x/y/Clazz.java");
+		assertPath("/a/b/c/y/Clazz.java", "/a/b/c", "\\x", "/x/y/Clazz.java");
+		assertPath("/a/b/c/y/Clazz.java", "/a/b/c", "\\x\\", "/x/y/Clazz.java");
+		assertPath("/a/b/c/y/Clazz.java", "/a/b/c", "\\x\\", "\\x\\y\\Clazz.java");
+		
+		// project folder not included in full path, not found
+		assertPath("", "/a/b/c", "/w", "/x/y/Clazz.java");
+	}
+	@Test
+	public void testSourcePathResolutionRelativeProjectLocation() {
+		assertPath("/a/b/c/y/Clazz.java", "/a/b/c", "x", FileUtil.getFullPath("x/y/Clazz.java"));
+		assertPath("/a/b/c/y/Clazz.java", "/a/b/c", "x/", FileUtil.getFullPath("x/y/Clazz.java"));
+		assertPath("/a/b/c/y/Clazz.java", "/a/b/c", "./x", FileUtil.getFullPath("x/y/Clazz.java"));
 	}
 	
 	public String resolveSourcePath(String sourceFolder, String projectFolder, String sourceFile) {
@@ -54,9 +66,10 @@ public class TestResolve {
 				prefix = prefix + "/";
 			System.out.println(prefix);
 			System.out.println(sourceFile);
-			if (sourceFile.startsWith(prefix)) {
+			if (sourceFile.startsWith(prefix))
 				sourceFile = JavaCs.substring(sourceFile, prefix.length(), sourceFile.length());
-			}
+			else
+				return "";
 		}
 		return FileUtil.getPath(sourceFolder, sourceFile);
 	}
