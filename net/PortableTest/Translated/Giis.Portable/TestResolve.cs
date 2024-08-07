@@ -11,19 +11,13 @@ namespace Giis.Portable
 	{
 		// More tests on resolution of the source file location
 		[Test]
-		public virtual void TestSourcePathResolution()
+		public virtual void TestNoProjectLocResolved()
 		{
 			AssertPath("/a/b/c/x/y/Clazz.java", "/a/b/c", string.Empty, "x/y/Clazz.java");
 			AssertPath("a/b/c/x/y/Clazz.java", "a/b/c", string.Empty, "x/y/Clazz.java");
 			AssertPath("a/b/c/x/y/Clazz.java", "a/b/c/", string.Empty, "x/y/Clazz.java");
 			AssertPath("a/b/c/x/y/Clazz.java", "a\\b\\c", string.Empty, "x\\y\\Clazz.java");
 			AssertPath("c:/a/b/c/x/y/Clazz.java", "c:\\a\\b\\c", string.Empty, "x\\y\\Clazz.java");
-			// if no source folder or file, returns empty (no resolved)
-			AssertPath(string.Empty, string.Empty, string.Empty, "x/y/Clazz.java");
-			AssertPath(string.Empty, null, string.Empty, "x/y/Clazz.java");
-			AssertPath(string.Empty, string.Empty, null, "x/y/Clazz.java");
-			AssertPath(string.Empty, "a/b/c", string.Empty, string.Empty);
-			AssertPath(string.Empty, "a/b/c", string.Empty, null);
 			// current folder
 			bool isJava = Parameters.IsJava();
 			AssertPath(isJava ? Full("x/y/Clazz.java") : "./x/y/Clazz.java", ".", string.Empty, "x/y/Clazz.java");
@@ -31,7 +25,18 @@ namespace Giis.Portable
 		}
 
 		[Test]
-		public virtual void TestSourcePathResolutionAbsoluteProjectLocation()
+		public virtual void TestNoProjectLocUnresolved()
+		{
+			// if no source folder or file, returns empty (no resolved)
+			AssertPath(string.Empty, string.Empty, string.Empty, "x/y/Clazz.java");
+			AssertPath(string.Empty, null, string.Empty, "x/y/Clazz.java");
+			AssertPath(string.Empty, string.Empty, null, "x/y/Clazz.java");
+			AssertPath(string.Empty, "a/b/c", string.Empty, string.Empty);
+			AssertPath(string.Empty, "a/b/c", string.Empty, null);
+		}
+
+		[Test]
+		public virtual void TestWithProjectLocAbsoluteResolved()
 		{
 			AssertPath("/a/b/c/y/Clazz.java", "/a/b/c", "/x", "/x/y/Clazz.java");
 			AssertPath("/a/b/c/y/Clazz.java", "/a/b/c", "/x/", "/x/y/Clazz.java");
@@ -41,18 +46,28 @@ namespace Giis.Portable
 		}
 
 		[Test]
-		public virtual void TestSourcePathResolutionNotResolved()
+		public virtual void TestWithProjectLocAbsoluteUnresolved()
 		{
-			// project folder not included in full path, not found
+			// project folder is not included in full path
 			AssertPath(string.Empty, "/a/b/c", "/w", "/x/y/Clazz.java");
 		}
 
 		[Test]
-		public virtual void TestSourcePathResolutionRelativeProjectLocation()
+		public virtual void TestWithProjectLocRelativeResolved()
 		{
 			AssertPath("/a/b/c/y/Clazz.java", "/a/b/c", "x", FileUtil.GetFullPath("x/y/Clazz.java"));
 			AssertPath("/a/b/c/y/Clazz.java", "/a/b/c", "x/", FileUtil.GetFullPath("x/y/Clazz.java"));
 			AssertPath("/a/b/c/y/Clazz.java", "/a/b/c", "./x", FileUtil.GetFullPath("x/y/Clazz.java"));
+			// current folder
+			AssertPath("/a/b/c/x/y/Clazz.java", "/a/b/c", ".", FileUtil.GetFullPath("x/y/Clazz.java"));
+			AssertPath("/a/b/c/x/y/Clazz.java", "/a/b/c", "./", FileUtil.GetFullPath("x/y/Clazz.java"));
+		}
+
+		[Test]
+		public virtual void TestWithProjectLocRelativeUnresolved()
+		{
+			// project folder is not included in full path
+			AssertPath(string.Empty, "/a/b/c", "w", FileUtil.GetFullPath("x/y/Clazz.java"));
 		}
 
 		public virtual string ResolveSourcePath(string sourceFolder, string projectFolder, string sourceFile)
@@ -61,16 +76,19 @@ namespace Giis.Portable
 			sourceFolder = JavaCs.IsEmpty(sourceFolder) ? string.Empty : sourceFolder.Trim();
 			projectFolder = JavaCs.IsEmpty(projectFolder) ? string.Empty : projectFolder.Trim();
 			sourceFile = JavaCs.IsEmpty(sourceFile) ? string.Empty : sourceFile.Trim();
-			// Source folder and source file are required, if not, the empty return means that source can't be fount
+			// Source folder and source file are required, if not, the empty return means
+			// that source can't be fount
 			if (string.Empty.Equals(sourceFolder) || string.Empty.Equals(sourceFile))
 			{
 				return string.Empty;
 			}
-			// If projectFolder specified (for net generated coverage), it is expected a full path source File
+			// If projectFolder specified (for net generated coverage), it is expected a
+			// full path source File
 			// that is converted to relative to projectFolder
 			if (!string.Empty.Equals(projectFolder))
 			{
-				// unifies separators (linux/windows) and simplifies double separators that appear sometimes
+				// unifies separators (linux/windows) and simplifies double separators that
+				// appear sometimes
 				sourceFile = FileUtil.GetFullPath(sourceFile.Replace("\\", "/")).Replace("\\", "/").Replace("//", "/");
 				string prefix = FileUtil.GetFullPath(projectFolder.Replace("\\", "/")).Replace("\\", "/").Replace("//", "/");
 				if (!prefix.EndsWith("/"))

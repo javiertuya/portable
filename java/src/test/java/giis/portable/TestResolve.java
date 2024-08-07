@@ -11,64 +11,84 @@ public class TestResolve {
 
 	// More tests on resolution of the source file location
 	@Test
-	public void testSourcePathResolution() {
+	public void testNoProjectLocResolved() {
 		assertPath("/a/b/c/x/y/Clazz.java", "/a/b/c", "", "x/y/Clazz.java");
 		assertPath("a/b/c/x/y/Clazz.java", "a/b/c", "", "x/y/Clazz.java");
 		assertPath("a/b/c/x/y/Clazz.java", "a/b/c/", "", "x/y/Clazz.java");
 		assertPath("a/b/c/x/y/Clazz.java", "a\\b\\c", "", "x\\y\\Clazz.java");
 		assertPath("c:/a/b/c/x/y/Clazz.java", "c:\\a\\b\\c", "", "x\\y\\Clazz.java");
 		
+		// current folder
+		boolean isJava = giis.portable.util.Parameters.isJava();
+		assertPath(isJava ? full("x/y/Clazz.java") : "./x/y/Clazz.java", ".", "", "x/y/Clazz.java");
+		assertPath(isJava ? full("x/y/Clazz.java") : "./x/y/Clazz.java", "./", "", "x/y/Clazz.java");
+	}
+
+	@Test
+	public void testNoProjectLocUnresolved() {
 		// if no source folder or file, returns empty (no resolved)
 		assertPath("", "", "", "x/y/Clazz.java");
 		assertPath("", null, "", "x/y/Clazz.java");
 		assertPath("", "", null, "x/y/Clazz.java");
 		assertPath("", "a/b/c", "", "");
 		assertPath("", "a/b/c", "", null);
-
-		// current folder
-		boolean isJava = giis.portable.util.Parameters.isJava();
-		assertPath(isJava ? full("x/y/Clazz.java") : "./x/y/Clazz.java", ".", "", "x/y/Clazz.java");
-		assertPath(isJava ? full("x/y/Clazz.java") : "./x/y/Clazz.java", "./", "", "x/y/Clazz.java");
 	}
+
 	@Test
-	public void testSourcePathResolutionAbsoluteProjectLocation() {
+	public void testWithProjectLocAbsoluteResolved() {
 		assertPath("/a/b/c/y/Clazz.java", "/a/b/c", "/x", "/x/y/Clazz.java");
 		assertPath("/a/b/c/y/Clazz.java", "/a/b/c", "/x/", "/x/y/Clazz.java");
 		assertPath("/a/b/c/y/Clazz.java", "/a/b/c", "\\x", "/x/y/Clazz.java");
 		assertPath("/a/b/c/y/Clazz.java", "/a/b/c", "\\x\\", "/x/y/Clazz.java");
 		assertPath("/a/b/c/y/Clazz.java", "/a/b/c", "\\x\\", "\\x\\y\\Clazz.java");
 	}
+
 	@Test
-	public void testSourcePathResolutionNotResolved() {
-		// project folder not included in full path, not found
+	public void testWithProjectLocAbsoluteUnresolved() {
+		// project folder is not included in full path
 		assertPath("", "/a/b/c", "/w", "/x/y/Clazz.java");
 	}
+
 	@Test
-	public void testSourcePathResolutionRelativeProjectLocation() {
+	public void testWithProjectLocRelativeResolved() {
 		assertPath("/a/b/c/y/Clazz.java", "/a/b/c", "x", FileUtil.getFullPath("x/y/Clazz.java"));
 		assertPath("/a/b/c/y/Clazz.java", "/a/b/c", "x/", FileUtil.getFullPath("x/y/Clazz.java"));
 		assertPath("/a/b/c/y/Clazz.java", "/a/b/c", "./x", FileUtil.getFullPath("x/y/Clazz.java"));
+		
+		// current folder
+		assertPath("/a/b/c/x/y/Clazz.java", "/a/b/c", ".", FileUtil.getFullPath("x/y/Clazz.java"));
+		assertPath("/a/b/c/x/y/Clazz.java", "/a/b/c", "./", FileUtil.getFullPath("x/y/Clazz.java"));
 	}
-	
+
+	@Test
+	public void testWithProjectLocRelativeUnresolved() {
+		// project folder is not included in full path
+		assertPath("", "/a/b/c", "w", FileUtil.getFullPath("x/y/Clazz.java"));
+	}
+
 	public String resolveSourcePath(String sourceFolder, String projectFolder, String sourceFile) {
-		System.out.println("Resolve: "+sourceFolder+" "+projectFolder+" "+sourceFile);
+		System.out.println("Resolve: " + sourceFolder + " " + projectFolder + " " + sourceFile);
 		sourceFolder = JavaCs.isEmpty(sourceFolder) ? "" : sourceFolder.trim();
 		projectFolder = JavaCs.isEmpty(projectFolder) ? "" : projectFolder.trim();
 		sourceFile = JavaCs.isEmpty(sourceFile) ? "" : sourceFile.trim();
-		
-		// Source folder and source file are required, if not, the empty return means that source can't be fount
+
+		// Source folder and source file are required, if not, the empty return means
+		// that source can't be fount
 		if ("".equals(sourceFolder) || "".equals(sourceFile))
-			return ""; 
-		
-		// If projectFolder specified (for net generated coverage), it is expected a full path source File
+			return "";
+
+		// If projectFolder specified (for net generated coverage), it is expected a
+		// full path source File
 		// that is converted to relative to projectFolder
 		if (!"".equals(projectFolder)) {
-			// unifies separators (linux/windows) and simplifies double separators that appear sometimes
+			// unifies separators (linux/windows) and simplifies double separators that
+			// appear sometimes
 			sourceFile = FileUtil.getFullPath(sourceFile.replace("\\", "/")).replace("\\", "/").replace("//", "/");
-			String prefix = FileUtil.getFullPath(projectFolder.replace("\\", "/")).replace("\\", "/").replace("//", "/");
+			String prefix = FileUtil.getFullPath(projectFolder.replace("\\", "/")).replace("\\", "/").replace("//",
+					"/");
 			if (!prefix.endsWith("/"))
 				prefix = prefix + "/";
-			
+
 			System.out.println(prefix);
 			System.out.println(sourceFile);
 			System.out.println(sourceFile.startsWith(prefix));
@@ -83,6 +103,7 @@ public class TestResolve {
 	private String full(String filename) {
 		return FileUtil.getFullPath(filename).replace("\\", "/");
 	}
+
 	private void assertPath(String expected, String source, String project, String file) {
 		assertEquals(expected, resolveSourcePath(source, project, file).replace("\\", "/"));
 	}
