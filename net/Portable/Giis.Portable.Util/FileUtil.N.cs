@@ -131,6 +131,27 @@ namespace Giis.Portable.Util
             return Path.Combine(Parameters.GetProjectRoot(), path); //en net, niveles por encima pues se ejecuta desde la carpeta de la dll
         }
 
+        /// <summary>
+        /// Returns a relative file name path from a path (relativeTo) to a file name (thisFile)
+        /// </summary>
+        public static string GetPathRelativeTo(string thisFile, string relativeTo)
+        {
+            string slash = Path.DirectorySeparatorChar.ToString();
+            thisFile = Path.GetFullPath(thisFile + (thisFile.EndsWith(slash) ? "" : slash));
+            relativeTo = Path.GetFullPath(relativeTo + (relativeTo.EndsWith(slash) ? "" : slash));
+
+            // a built in function is available since netstandard 2.1
+            // this adapts solution from https://stackoverflow.com/questions/51179331/is-it-possible-to-use-path-getrelativepath-net-core2-in-winforms-proj-targeti
+            var uri = new Uri(relativeTo);
+            var rel = Uri.UnescapeDataString(uri.MakeRelativeUri(new Uri(thisFile)).ToString()).Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
+            if (rel.Contains(Path.DirectorySeparatorChar.ToString()) == false)
+                 rel = $".{Path.DirectorySeparatorChar}{rel}";
+
+            if (rel.EndsWith(slash))
+                rel = rel.Substring(0, rel.Length - 1);
+            return rel;
+        }
+
         /** 
          * Crea la carpeta indicada como parametro (la carpeta puede existir, o si no existe, debe existir el padre)
          */

@@ -159,5 +159,39 @@ namespace Giis.Portable
 			NUnit.Framework.Legacy.ClassicAssert.AreEqual("xxx", FileUtil.FileRead(FileUtil.GetPath(".", testpaths), "check.txt"));
 			NUnit.Framework.Legacy.ClassicAssert.AreEqual("xxx", FileUtil.FileRead(FileUtil.GetPath("..", parent, testpaths), "check.txt"));
 		}
+
+		[Test]
+		public virtual void TestRelativizePathLinuxSeparator()
+		{
+			// upper, folder, sibling folder
+			NUnit.Framework.Legacy.ClassicAssert.AreEqual("c/Clazz.java", FileUtil.GetPathRelativeTo("a/b/c/Clazz.java", "a/b").Replace("\\", "/"));
+			NUnit.Framework.Legacy.ClassicAssert.AreEqual("../Clazz.java", FileUtil.GetPathRelativeTo("a/b/c/Clazz.java", "a/b/c/d").Replace("\\", "/"));
+			NUnit.Framework.Legacy.ClassicAssert.AreEqual("../../c/Clazz.java", FileUtil.GetPathRelativeTo("a/b/c/Clazz.java", "a/b/x/y").Replace("\\", "/"));
+			// ending slash
+			NUnit.Framework.Legacy.ClassicAssert.AreEqual("c/Clazz.java", FileUtil.GetPathRelativeTo("a/b/c/Clazz.java", "a/b/").Replace("\\", "/"));
+			NUnit.Framework.Legacy.ClassicAssert.AreEqual("../Clazz.java", FileUtil.GetPathRelativeTo("a/b/c/Clazz.java", "a/b/c/d/").Replace("\\", "/"));
+			NUnit.Framework.Legacy.ClassicAssert.AreEqual("../../c/Clazz.java", FileUtil.GetPathRelativeTo("a/b/c/Clazz.java", "a/b/x/y/").Replace("\\", "/"));
+			// absolute file name
+			NUnit.Framework.Legacy.ClassicAssert.AreEqual("c/Clazz.java", FileUtil.GetPathRelativeTo(FileUtil.GetFullPath("a/b/c/Clazz.java"), FileUtil.GetFullPath("a/b")).Replace("\\", "/"));
+			NUnit.Framework.Legacy.ClassicAssert.AreEqual("../Clazz.java", FileUtil.GetPathRelativeTo(FileUtil.GetFullPath("a/b/c/Clazz.java"), FileUtil.GetFullPath("a/b/c/d")).Replace("\\", "/"));
+			NUnit.Framework.Legacy.ClassicAssert.AreEqual("../../c/Clazz.java", FileUtil.GetPathRelativeTo(FileUtil.GetFullPath("a/b/c/Clazz.java"), FileUtil.GetFullPath("a/b/x/y")).Replace("\\", "/"));
+		}
+
+		[Test]
+		public virtual void TestRelativizePathWindowsSeparator()
+		{
+			// upper, folder, sibling folder
+			NUnit.Framework.Legacy.ClassicAssert.AreEqual("c/Clazz.java", FileUtil.GetPathRelativeTo("a\\b\\c\\Clazz.java", "a\\b").Replace("\\", "/"));
+			NUnit.Framework.Legacy.ClassicAssert.AreEqual("../Clazz.java", FileUtil.GetPathRelativeTo("a\\b\\c\\Clazz.java", "a\\b\\c\\d").Replace("\\", "/"));
+			NUnit.Framework.Legacy.ClassicAssert.AreEqual("../../c/Clazz.java", FileUtil.GetPathRelativeTo("a\\b\\c\\Clazz.java", "a\\b\\x\\y").Replace("\\", "/"));
+			// ending slash
+			NUnit.Framework.Legacy.ClassicAssert.AreEqual("c/Clazz.java", FileUtil.GetPathRelativeTo("a\\b\\c\\Clazz.java", "a\\b\\").Replace("\\", "/"));
+			NUnit.Framework.Legacy.ClassicAssert.AreEqual("../Clazz.java", FileUtil.GetPathRelativeTo("a\\b\\c\\Clazz.java", "a\\b\\c\\d\\").Replace("\\", "/"));
+			NUnit.Framework.Legacy.ClassicAssert.AreEqual("../../c/Clazz.java", FileUtil.GetPathRelativeTo("a\\b\\c\\Clazz.java", "a\\b\\x\\y\\").Replace("\\", "/"));
+			// absolute file name
+			NUnit.Framework.Legacy.ClassicAssert.AreEqual("c/Clazz.java", FileUtil.GetPathRelativeTo(FileUtil.GetFullPath("a\\b\\c\\Clazz.java"), FileUtil.GetFullPath("a\\b")).Replace("\\", "/"));
+			NUnit.Framework.Legacy.ClassicAssert.AreEqual("../Clazz.java", FileUtil.GetPathRelativeTo(FileUtil.GetFullPath("a\\b\\c\\Clazz.java"), FileUtil.GetFullPath("a\\b\\c\\d")).Replace("\\", "/"));
+			NUnit.Framework.Legacy.ClassicAssert.AreEqual("../../c/Clazz.java", FileUtil.GetPathRelativeTo(FileUtil.GetFullPath("a\\b\\c\\Clazz.java"), FileUtil.GetFullPath("a\\b\\x\\y")).Replace("\\", "/"));
+		}
 	}
 }
