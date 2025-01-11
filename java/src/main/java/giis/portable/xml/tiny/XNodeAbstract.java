@@ -2,6 +2,8 @@ package giis.portable.xml.tiny;
 
 import java.util.List;
 
+import giis.portable.util.JavaCs;
+
 /**
  * Base class with implementation of methods that are common in java and net
  */
@@ -37,15 +39,15 @@ public abstract class XNodeAbstract {
 		if ("".equals(current)) // does not exists, default
 			return 0;
 		else
-			return Integer.valueOf(current);
+			return JavaCs.stringToInt(current);
 	}
 
 	public void incrementIntAttribute(String name, int value) {
 		String current = this.getAttribute(name);
 		if ("".equals(current)) // does not exist, sets this value
-			this.setAttribute(name, String.valueOf(value));
+			this.setAttribute(name, JavaCs.numToString(value));
 		else // exist, increments
-			this.setAttribute(name, String.valueOf(value + Integer.parseInt(this.getAttribute(name))));
+			this.setAttribute(name, JavaCs.numToString(value + JavaCs.stringToInt(this.getAttribute(name))));
 	}
 	
 	/**

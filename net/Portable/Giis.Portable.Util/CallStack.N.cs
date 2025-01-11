@@ -10,6 +10,7 @@ namespace Giis.Portable.Util
     public class CallStack
     {
         private readonly string[] stack;
+        public int Count { get {  return stack.Length; } } // needed for java conversion
 
         public CallStack()
         {
@@ -33,7 +34,7 @@ namespace Giis.Portable.Util
             int start = stack[position].IndexOf(from);
             if (start < 0) //no encontrado inicio (p.e. metodos del sistema al buscar linea, pues no se muestra)
                 return "";
-            start = start + from.Length;
+            start += from.Length;
             int end = to==null ? stack[position].Length : stack[position].IndexOf(to, start);
             return stack[position].Substring(start, end - start).Trim();
         }

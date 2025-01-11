@@ -38,6 +38,9 @@ public class JavaCs {
 	public static String numToString(long value) {
 		return Long.toString(value);
 	}
+	public static int stringToInt(String value) {
+		return Integer.valueOf(value);
+	}
 
 	public static String[] toArray(List<String> lst) {
 		return lst.toArray(new String[lst.size()]);

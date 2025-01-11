@@ -49,7 +49,7 @@ public class TestJavaCs {
 
 	@Test
 	public void testContainsIgnoreCase() {
-		List<String> target = new ArrayList<>();
+		List<String> target = new ArrayList<String>(); // NOSONAR for java conversion
 		target.add("aBc");
 		target.add("xYz");
 		assertTrue(JavaCs.containsIgnoreCase(target, "AbC"));
@@ -59,7 +59,7 @@ public class TestJavaCs {
 
 	@Test
 	public void testToArray() {
-		List<String> single = new ArrayList<>();
+		List<String> single = new ArrayList<String>(); // NOSONAR for java conversion
 		single.add("abc");
 		single.add("xyz");
 		// uses deepToString to easier comparison on C#
@@ -87,11 +87,17 @@ public class TestJavaCs {
 
 	@Test
 	public void testIsEmptyList() {
-		List<String> lst=new ArrayList<>();
+		List<String> lst=new ArrayList<String>(); // NOSONAR for java conversion
 		assertTrue(JavaCs.isEmpty(lst));
 		assertTrue(JavaCs.isEmpty((List<String>)null));
 		lst.add("txt");
 		assertFalse(JavaCs.isEmpty(lst));
+	}
+	
+	@Test
+	public void testNumToString() {
+		assertEquals("6", JavaCs.numToString(2+4));
+		assertEquals(24, JavaCs.stringToInt("2"+"4"));
 	}
 
 	@Test
