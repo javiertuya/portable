@@ -37,7 +37,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="NLog" Version="5.3.4" />
+    <PackageReference Include="NLog" Version="5.4.0" />
 
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
