@@ -19,7 +19,7 @@ public class TestVersions {
 		String version = new Versions(new PortableException("").getClass(), "io.github.javiertuya", "portable-java").getVersion();
 		String[] items = JavaCs.splitByDot(version);
 		assertEquals("2", items[0]);
-		assertEquals("3", items[1]);
+		assertEquals("4", items[1]);
 
 		// java only, does not need specify any class
 		if (Parameters.isJava()) {

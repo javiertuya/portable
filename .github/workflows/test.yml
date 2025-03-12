@@ -19,6 +19,10 @@ jobs:
     defaults:
       run:
         working-directory: java
+    permissions:
+      #id-token: write
+      contents: read
+      checks: write
     #if: ${{ false }}  # disable for now
     steps:
       - name: Checkout GitHub repo
