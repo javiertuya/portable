@@ -42,6 +42,12 @@ public class TestJavaCs {
 	}
 
 	@Test
+	public void testCharAt() {
+		assertEquals('a', JavaCs.charAt("axY", 0));
+		assertEquals('Y', JavaCs.charAt("axY", 2));
+	}
+
+	@Test
 	public void testContainsIgnoreCase() {
 		List<String> target = new ArrayList<String>(); // NOSONAR for java conversion
 		target.add("aBc");

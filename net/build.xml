@@ -20,6 +20,9 @@
       <replacefilter token="using converted.placeholder;" value="/////// THIS FILE HAS BEEN AUTOMATICALLY CONVERTED FROM THE JAVA SOURCES. DO NOT EDIT ///////" />
       <!-- nunit requires the exact exception in assert throws, allows derived types -->
       <replacefilter token="Assert.Throws(typeof(Exception)" value="Assert.Throws(Is.InstanceOf(typeof(Exception))" />
+
+      <!-- Replacement to handle maps (implementations are in the Java.Util namespace) -->
+      <replacefilter token="Dictionary&lt;" value="Map&lt;" />
     </replace>
   </target>
 

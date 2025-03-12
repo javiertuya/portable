@@ -34,6 +34,9 @@ public class JavaCs {
 				return true;
 		return false;
 	}
+	public static char charAt(String str, int index) {
+		return str.charAt(index);
+	}
 
 	public static String numToString(long value) {
 		return Long.toString(value);
@@ -52,6 +55,10 @@ public class JavaCs {
 		return Arrays.deepToString(strArray);
 	}
 
+	/**
+	 * @deprecated Use the Java native Map implementations or the custom .NET Map implementations in java.util
+	 */
+	@Deprecated
 	public static void putAll(Map<String, Object> targetMap, Map<String, Object> mapToAdd) {
 		targetMap.putAll(mapToAdd);
 	}

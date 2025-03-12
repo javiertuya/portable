@@ -45,6 +45,13 @@ namespace Giis.Portable
         }
 
         [Test]
+        public virtual void TestCharAt()
+        {
+            NUnit.Framework.Legacy.ClassicAssert.AreEqual('a', JavaCs.CharAt("axY", 0));
+            NUnit.Framework.Legacy.ClassicAssert.AreEqual('Y', JavaCs.CharAt("axY", 2));
+        }
+
+        [Test]
         public virtual void TestContainsIgnoreCase()
         {
             IList<string> target = new List<string>(); // NOSONAR for java conversion

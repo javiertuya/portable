@@ -31,6 +31,10 @@ namespace Giis.Portable.Util
                     return true;
             return false;
         }
+        public static char CharAt(string str, int index)
+        {
+            return str[index];
+        }
 
         public static string NumToString(long value)
         {
@@ -40,7 +44,6 @@ namespace Giis.Portable.Util
         {
             return int.Parse(value);
         }
-
 
         public static string[] ToArray(List<string> lst)
         {
@@ -63,6 +66,7 @@ namespace Giis.Portable.Util
             return "[" + sb.ToString() + "]";
         }
 
+        [Obsolete("Use the Java native Map implementations or the custom .NET Map implementations in java.util")]
         public static void PutAll(IDictionary<string, object> targetMap, IDictionary<string, object> mapToAdd)
         {
             foreach (string key in mapToAdd.Keys)
