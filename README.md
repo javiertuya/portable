@@ -15,4 +15,4 @@ Available on Java and .NET:
   [NuGet](https://www.nuget.org/packages/PortableCs)
 
 Contains different implementations in the `java` and `net` folders,
-but the tests are shared (converted from java to .net using Sharpen).
+but the tests are shared (converted from java to .net using the [JavaToCsharp](https://github.com/paulirwin/JavaToCSharp) converter).

@@ -39,6 +39,7 @@ public class TestProperties {
 	public void testReadPropertiesFromClassPath() {
 		if (!Parameters.isJava())
 			return;
+		// If running from eclipse and fails, run from maven before and then refresh
 		String propFile = "test-classpath.properties";
 		Properties prop = new PropertiesFactory().getPropertiesFromClassPath(propFile);
 		assertEquals("psimple", prop.getProperty("prop.simple"));

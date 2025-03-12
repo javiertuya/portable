@@ -36,6 +36,11 @@ namespace Giis.Portable.Util
         {
             return value.ToString();
         }
+        public static int StringToInt(string value)
+        {
+            return int.Parse(value);
+        }
+
 
         public static string[] ToArray(List<string> lst)
         {

@@ -15,6 +15,7 @@ public class TestVersions {
 	public void testVersionOfThisArtifact() {
 		// The portable approach by specifying a class and artifact name
 		// Update when major or minor version changes
+		// If running from eclipse and fails, run from maven before and then refresh
 		String version = new Versions(new PortableException("").getClass(), "io.github.javiertuya", "portable-java").getVersion();
 		String[] items = JavaCs.splitByDot(version);
 		assertEquals("2", items[0]);
