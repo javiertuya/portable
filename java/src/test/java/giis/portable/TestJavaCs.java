@@ -2,8 +2,8 @@ package giis.portable;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,12 +26,9 @@ public class TestJavaCs {
 		assertEquals("ab", JavaCs.substring("ab", 0));
 		assertEquals("b", JavaCs.substring("ab", 1));
 		assertEquals("", JavaCs.substring("ab", 2));
-		try {
+		assertThrows(RuntimeException.class, () -> {
 			JavaCs.substring("ab", 3);
-			fail("Should raise exception");
-		} catch (RuntimeException e) {
-			// success
-		}
+		});
 	}
 
 	@Test
@@ -39,12 +36,9 @@ public class TestJavaCs {
 		assertEquals("", JavaCs.substring("abc", 1, 1));
 		assertEquals("b", JavaCs.substring("abc", 1, 2));
 		assertEquals("bc", JavaCs.substring("abc", 1, 3));
-		try {
+		assertThrows(RuntimeException.class, () -> {
 			JavaCs.substring("abc", 1, 4);
-			fail("Should raise exception");
-		} catch (RuntimeException e) {
-			// success
-		}
+		});
 	}
 
 	@Test

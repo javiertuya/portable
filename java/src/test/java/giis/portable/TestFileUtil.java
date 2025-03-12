@@ -2,8 +2,8 @@ package giis.portable;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.util.List;
 
@@ -85,36 +85,28 @@ public class TestFileUtil {
 	@Test
 	public void testReadFileDoesNotExist() {
 		assertNull(FileUtil.fileRead("target", "file-does-not-exist.tmp", false));
-		try {
+		assertThrows(RuntimeException.class, () -> {
 			FileUtil.fileRead("target", "file-does-not-exist.tmp", true);
-			fail("Should raise exception");
-		} catch (RuntimeException e) {
-		}
+		});
 	}
 	@Test
 	public void testReadLinesDoesNotExist() {
 		assertEquals(0, FileUtil.fileReadLines("target", "file-does-not-exist.tmp", false).size());
-		try {
+		assertThrows(RuntimeException.class, () -> {
 			FileUtil.fileReadLines("target", "file-does-not-exist.tmp", true);
-			fail("Should raise exception");
-		} catch (RuntimeException e) {
-		}
+		});
 	}
 	@Test
 	public void testCopySourceDoesNotExist() {
-		try {
+		assertThrows(RuntimeException.class, () -> {
 			FileUtil.copyFile("target/file-does-not-exist.tmp", "target/x.tmp");
-			fail("Should raise exception");
-		} catch (RuntimeException e) {
-		}
+		});
 	}
 	@Test
 	public void testDirectoryDoesNotExist() {
-		try {
+		assertThrows(RuntimeException.class, () -> {
 			FileUtil.getFileListInDirectory("directory-does-not-exist"); // invalid path
-			fail("Should raise exception");
-		} catch (RuntimeException e) {
-		}
+		});
 	}
 
 	@Test

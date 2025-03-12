@@ -205,14 +205,10 @@ namespace Giis.Portable
             NUnit.Framework.Legacy.ClassicAssert.AreEqual(5, n1.GetIntAttribute("bbb"));
             n1.IncrementIntAttribute("notexisted", 32); // default specified
             NUnit.Framework.Legacy.ClassicAssert.AreEqual(32, n1.GetIntAttribute("notexisted"));
-            try
+            NUnit.Framework.Assert.Throws(Is.InstanceOf(typeof(Exception)), () =>
             {
                 n1.GetIntAttribute("aaa");
-                NUnit.Framework.Legacy.ClassicAssert.Fail("Should fail");
-            }
-            catch (Exception e)
-            {
-            }
+            });
         }
 
         [Test]
@@ -451,15 +447,10 @@ namespace Giis.Portable
 
             //node created under a different document can't be added
             XNode external = new XNode("<ext><subelem/></ext>");
-            try
+            NUnit.Framework.Assert.Throws(Is.InstanceOf(typeof(Exception)), () =>
             {
-                main.AppendChild(external);
-                NUnit.Framework.Legacy.ClassicAssert.Fail("Should fail");
-            }
-            catch (Exception e)
-            {
-            }
-
+                new XNode("<main><elem/></main>").AppendChild(external);
+            });
 
             //But works if the new node is imported
             main = new XNode("<main><elem/></main>");

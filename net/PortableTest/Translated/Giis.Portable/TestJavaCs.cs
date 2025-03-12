@@ -26,14 +26,10 @@ namespace Giis.Portable
             NUnit.Framework.Legacy.ClassicAssert.AreEqual("ab", JavaCs.Substring("ab", 0));
             NUnit.Framework.Legacy.ClassicAssert.AreEqual("b", JavaCs.Substring("ab", 1));
             NUnit.Framework.Legacy.ClassicAssert.AreEqual("", JavaCs.Substring("ab", 2));
-            try
+            NUnit.Framework.Assert.Throws(Is.InstanceOf(typeof(Exception)), () =>
             {
                 JavaCs.Substring("ab", 3);
-                NUnit.Framework.Legacy.ClassicAssert.Fail("Should raise exception");
-            }
-            catch (Exception e)
-            {
-            }
+            });
         }
 
         [Test]
@@ -42,14 +38,10 @@ namespace Giis.Portable
             NUnit.Framework.Legacy.ClassicAssert.AreEqual("", JavaCs.Substring("abc", 1, 1));
             NUnit.Framework.Legacy.ClassicAssert.AreEqual("b", JavaCs.Substring("abc", 1, 2));
             NUnit.Framework.Legacy.ClassicAssert.AreEqual("bc", JavaCs.Substring("abc", 1, 3));
-            try
+            NUnit.Framework.Assert.Throws(Is.InstanceOf(typeof(Exception)), () =>
             {
                 JavaCs.Substring("abc", 1, 4);
-                NUnit.Framework.Legacy.ClassicAssert.Fail("Should raise exception");
-            }
-            catch (Exception e)
-            {
-            }
+            });
         }
 
         [Test]

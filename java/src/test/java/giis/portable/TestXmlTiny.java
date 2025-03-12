@@ -3,8 +3,8 @@ package giis.portable;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.util.List;
 
@@ -206,11 +206,9 @@ public class TestXmlTiny {
 		n1.incrementIntAttribute("notexisted", 32); // default specified
 		assertEquals(32, n1.getIntAttribute("notexisted"));
 
-		try {
+		assertThrows(RuntimeException.class, () -> {
 			n1.getIntAttribute("aaa");
-			fail("Should fail");
-		} catch (RuntimeException e) {
-		}
+		});
 	}
 	@Test
 	public void testElementAttributesAsElement() {
@@ -418,11 +416,10 @@ public class TestXmlTiny {
 		
 		//node created under a different document can't be added
 		XNode external=new XNode("<ext><subelem/></ext>");
-		try {
-			main.appendChild(external);
-			fail("Should fail");
-		} catch (RuntimeException e) {
-		}
+		assertThrows(RuntimeException.class, () -> {
+			new XNode("<main><elem/></main>").appendChild(external);
+		});
+
 		//But works if the new node is imported
 		main=new XNode("<main><elem/></main>");
 		main.appendChild(main.importNode(external));

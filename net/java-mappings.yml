@@ -6,6 +6,7 @@ ImportMappings:
   org.junit.Assert.assertTrue : ""
   org.junit.Assert.assertFalse : ""
   org.junit.Assert.assertNull : ""
+  org.junit.Assert.assertThrows : ""
   org.junit.Assert.fail : ""
 
 NonVoidMethodMappings:
@@ -16,6 +17,7 @@ VoidMethodMappings:
   assertTrue : NUnit.Framework.Legacy.ClassicAssert.IsTrue
   assertFalse : NUnit.Framework.Legacy.ClassicAssert.IsFalse
   assertNull : NUnit.Framework.Legacy.ClassicAssert.IsNull
+  assertThrows : NUnit.Framework.Assert.Throws
   fail : NUnit.Framework.Legacy.ClassicAssert.Fail
 
 AnnotationMappings:

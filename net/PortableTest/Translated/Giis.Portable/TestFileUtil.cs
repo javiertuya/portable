@@ -77,54 +77,38 @@ namespace Giis.Portable
         public virtual void TestReadFileDoesNotExist()
         {
             NUnit.Framework.Legacy.ClassicAssert.IsNull(FileUtil.FileRead("target", "file-does-not-exist.tmp", false));
-            try
+            NUnit.Framework.Assert.Throws(Is.InstanceOf(typeof(Exception)), () =>
             {
                 FileUtil.FileRead("target", "file-does-not-exist.tmp", true);
-                NUnit.Framework.Legacy.ClassicAssert.Fail("Should raise exception");
-            }
-            catch (Exception e)
-            {
-            }
+            });
         }
 
         [Test]
         public virtual void TestReadLinesDoesNotExist()
         {
             NUnit.Framework.Legacy.ClassicAssert.AreEqual(0, FileUtil.FileReadLines("target", "file-does-not-exist.tmp", false).Count);
-            try
+            NUnit.Framework.Assert.Throws(Is.InstanceOf(typeof(Exception)), () =>
             {
                 FileUtil.FileReadLines("target", "file-does-not-exist.tmp", true);
-                NUnit.Framework.Legacy.ClassicAssert.Fail("Should raise exception");
-            }
-            catch (Exception e)
-            {
-            }
+            });
         }
 
         [Test]
         public virtual void TestCopySourceDoesNotExist()
         {
-            try
+            NUnit.Framework.Assert.Throws(Is.InstanceOf(typeof(Exception)), () =>
             {
                 FileUtil.CopyFile("target/file-does-not-exist.tmp", "target/x.tmp");
-                NUnit.Framework.Legacy.ClassicAssert.Fail("Should raise exception");
-            }
-            catch (Exception e)
-            {
-            }
+            });
         }
 
         [Test]
         public virtual void TestDirectoryDoesNotExist()
         {
-            try
+            NUnit.Framework.Assert.Throws(Is.InstanceOf(typeof(Exception)), () =>
             {
                 FileUtil.GetFileListInDirectory("directory-does-not-exist"); // invalid path
-                NUnit.Framework.Legacy.ClassicAssert.Fail("Should raise exception");
-            }
-            catch (Exception e)
-            {
-            }
+            });
         }
 
         [Test]
