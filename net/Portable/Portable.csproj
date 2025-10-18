@@ -3,8 +3,8 @@
     <OutputType>Library</OutputType>
     <TargetFramework>netstandard2.0</TargetFramework>
     <PackageId>PortableCs</PackageId>
-    <InformationalVersion>2.4.1-SNAPSHOT</InformationalVersion>
-    <Version>2.4.1-SNAPSHOT</Version>
+    <InformationalVersion>2.4.2</InformationalVersion>
+    <Version>2.4.2</Version>
  
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>CS1591</NoWarn>
