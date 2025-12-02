@@ -51,9 +51,10 @@ jobs:
       packages: write 
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/setup-dotnet@v5.0.0
+
+      - uses: actions/setup-dotnet@v5.0.1
         with:
-            dotnet-version: '6.0.x'
+            dotnet-version: '8.0.x'
       - name: Pack
         run: dotnet pack --configuration Release Portable/Portable.csproj
       #- name: Push to GitHub packages
