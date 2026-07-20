@@ -16,6 +16,8 @@ permissions:
 jobs:
   test-java:
     runs-on: ubuntu-latest
+    #avoids duplicate execution of pr from local repo, but allows pr from forked repos and dependabot
+    if: (github.event_name != 'pull_request' && ! github.event.pull_request.head.repo.fork) || (github.event_name == 'pull_request' && (github.event.pull_request.head.repo.fork || startsWith(github.head_ref, 'dependabot/')))
     defaults:
       run:
         working-directory: java
@@ -54,6 +56,8 @@ jobs:
             java/target/surefire-reports
   test-net:
     runs-on: ubuntu-latest
+    #avoids duplicate execution of pr from local repo, but allows pr from forked repos and dependabot
+    if: (github.event_name != 'pull_request' && ! github.event.pull_request.head.repo.fork) || (github.event_name == 'pull_request' && (github.event.pull_request.head.repo.fork || startsWith(github.head_ref, 'dependabot/')))
     defaults:
       run:
         working-directory: net
