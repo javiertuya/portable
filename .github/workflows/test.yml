@@ -116,8 +116,8 @@ jobs:
           dotnet build
 
   publish-java-snapshot:
-    #avoid publishing PRs and dependabot branches
-    if: ${{ github.event_name != 'pull_request' && !contains('/head/refs/dependabot/', github.ref) }}
+    #avoid publishing PRs and the dependabot and dashgit branches
+    if: ${{ github.event_name != 'pull_request' && !startsWith(github.ref, 'refs/heads/dependabot/') && !startsWith(github.ref, 'refs/heads/dashgit/combined/') }}
     runs-on: ubuntu-latest
     defaults:
       run:
